@@ -1,0 +1,34 @@
+{
+	"pages": [
+		{
+		"path": "pages/welcome/welcome",
+		"style": {
+			"navigationBarTitleText": "欢迎"
+			
+		}
+		},
+		{
+		"path": "pages/login/login",
+		"style": {
+			"navigationBarTitleText": "登录"
+		}
+		},
+		{
+		"path": "pages/register/register",
+		"style": {
+			"navigationBarTitleText": "注册"
+		}
+		}
+		
+	]
+	// "globalStyle": {
+	// 	"navigationBarTextStyle": "green",
+	// 	"navigationBarTitleText": "uni-app",
+	// 	"navigationBarBackgroundColor": "#F8F8F8",
+	// 	"backgroundColor": "#F8F8F8"
+	// }
+	
+		
+	}
+}
+

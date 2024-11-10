@@ -91,6 +91,13 @@
 				"navigationBarTitleText": "智能客服中心",
 				"navigationStyle": "custom"
 			}
+		},
+		{
+			"path": "pages/trip-detail/trip-detail",
+			"style": {
+				"navigationBarTitleText": "行程详情",
+				"navigationStyle": "custom"
+			}
 		}
 	]
 	//"globalStyle": {

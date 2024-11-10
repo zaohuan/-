@@ -81,7 +81,7 @@
 			{
 				"navigationBarTitleText" : ""
 			}
-		}，
+		},
 		{
 			"path": "pages/realtime/realtime",
 			"style": {

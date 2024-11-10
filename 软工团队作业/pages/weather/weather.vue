@@ -48,6 +48,7 @@
 					></image>
 				</view>
 			</view>
+			<view class="current-date">{{currentDate}}</view>
 			<view class="weather-detail">
 				<view class="detail-item">
 					<image 
@@ -166,17 +167,12 @@
 			// 获取天气数据的接口
 			async getWeatherData(city) {
 				try {
-					// 这里等待后端接口
-					// const response = await uni.request({
-					//     url: 'YOUR_API_URL',
-					//     method: 'GET',
-					//     data: { city }
-					// });
-					// this.weatherData = response.data;
+					// 获取未来5天的日期
+					const dates = this.getNextFiveDays();
 					
-					// 临时使用模拟数据
+					// 临时使用模拟数据，但使用真实日期
 					this.weatherData = {
-						city: city || '北京市',
+						city: city || '鼓楼市',
 						temperature: 25,
 						todayTemp: {
 							max: 28,
@@ -188,11 +184,11 @@
 						humidity: '40',
 						sunTime: '06:32/18:05',
 						forecast: [
-							{ date: '明天', dayWeather: '多云', tempMin: 20, tempMax: 28 },
-							{ date: '后天', dayWeather: '晴天', tempMin: 22, tempMax: 30 },
-							{ date: '周三', dayWeather: '雷雨', tempMin: 16, tempMax: 23 },
-							{ date: '周四', dayWeather: '降雪', tempMin: -11, tempMax: 1 },
-							{ date: '周五', dayWeather: '多云', tempMin: 19, tempMax: 26 }
+							{ date: dates[0], dayWeather: '多云', tempMin: 20, tempMax: 28 },
+							{ date: dates[1], dayWeather: '晴天', tempMin: 22, tempMax: 30 },
+							{ date: dates[2], dayWeather: '雷雨', tempMin: 16, tempMax: 23 },
+							{ date: dates[3], dayWeather: '降雪', tempMin: -11, tempMax: 1 },
+							{ date: dates[4], dayWeather: '多云', tempMin: 19, tempMax: 26 }
 						]
 					}
 				} catch (e) {
@@ -201,6 +197,28 @@
 						icon: 'none'
 					});
 				}
+			},
+			
+			// 添加新方法：获取未来5天的日期
+			getNextFiveDays() {
+				const days = [];
+				const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+				
+				for (let i = 1; i <= 5; i++) {
+					const date = new Date();
+					date.setDate(date.getDate() + i);
+					
+					// 获取月和日
+					const month = date.getMonth() + 1;
+					const day = date.getDate();
+					const weekDay = weekDays[date.getDay()];
+					
+					// 格式化日期，例如：12/03 周三
+					const formattedDate = `${month}/${day} ${weekDay}`;
+					days.push(formattedDate);
+				}
+				
+				return days;
 			},
 			
 			// 获取天气图标
@@ -231,9 +249,9 @@
 			// 启动定时器更新时间
 			startTimeUpdate() {
 				this.updateDateTime();
-				setInterval(() => {
+				this.timeInterval = setInterval(() => {
 					this.updateDateTime();
-				}, 60000); // 每分钟更新一次
+				}, 60000);
 			}
 		},
 		onLoad() {
@@ -458,5 +476,12 @@
 	font-size: 38rpx;
 	color: #333;
 	margin: 15rpx;
+}
+
+.current-date {
+	text-align: center;
+	font-size: 38rpx;
+	color: #666;
+	margin-bottom: 30rpx;
 }
 </style>

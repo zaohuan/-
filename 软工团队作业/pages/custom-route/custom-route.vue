@@ -61,7 +61,7 @@
       </view>
 
       <!-- 个性需求输入区域 -->
-      <view class="form-title sub">请填写您对旅游景点的个性需求</view>
+      <view class="form-title sub">请填写您对旅游景点的个性需求(选填)</view>
       <view class="requirement-section">
         <view class="form-item">
           <text class="required">*</text>
@@ -118,8 +118,16 @@ export default defineComponent({
     })
 
     const submitForm = () => {
-      console.log('提交的表单数据：', formData)
-      // 这里添加表单提交逻辑
+      // 这里可以添加表单验证逻辑
+      
+      // 跳转到推荐结果页面并传递数据
+      uni.navigateTo({
+        url: '/pages/tuijianjieguo/tuijianjieguo',
+        success: (res) => {
+          // 通过eventChannel向被打开页面传送数据
+          res.eventChannel.emit('acceptFormData', formData)
+        }
+      })
     }
 
     return {
@@ -227,4 +235,4 @@ radio-group {
   font-size: 12px;
   margin-top: 5px;
 }
-</style>
+</style> 

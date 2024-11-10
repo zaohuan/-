@@ -81,6 +81,18 @@
 			{
 				"navigationBarTitleText" : ""
 			}
+		}，
+		{
+			"path": "pages/realtime/realtime",
+			"style": {
+				"navigationBarTitleText": "实时调整"
+			}
+		},
+		{
+			"path": "pages/prepare/prepare",
+			"style": {
+				"navigationBarTitleText": "未雨绸缪"
+			}
 		}
 		
 	]

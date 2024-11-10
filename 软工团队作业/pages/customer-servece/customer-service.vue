@@ -3,7 +3,7 @@
     <!-- 顶部导航栏 -->
     <view class="header">
       <view class="back-icon" @click="goBack">
-        <image src="/static/icons/back.png" mode="widthFix"></image>
+        <text class="back-text">＜</text>
       </view>
       <text class="title">智能客服中心</text>
     </view>
@@ -12,9 +12,17 @@
     <view class="service-section">
       <text class="section-title">推荐服务</text>
       <view class="service-grid">
-        <view class="service-item" v-for="(item, index) in recommendServices" :key="index" @click="handleServiceClick(item)">
-          <image :src="item.icon" mode="widthFix"></image>
-          <text>{{item.name}}</text>
+        <view class="service-row">
+          <view class="service-item" v-for="(item, index) in recommendServices.slice(0, 3)" :key="index" @click="handleServiceClick(item)">
+            <image :src="item.icon" mode="widthFix"></image>
+            <text>{{item.name}}</text>
+          </view>
+        </view>
+        <view class="service-row">
+          <view class="service-item" v-for="(item, index) in recommendServices.slice(3, 6)" :key="index + 3" @click="handleServiceClick(item)">
+            <image :src="item.icon" mode="widthFix"></image>
+            <text>{{item.name}}</text>
+          </view>
         </view>
       </view>
     </view>
@@ -23,9 +31,17 @@
     <view class="service-section">
       <text class="section-title">热门资讯</text>
       <view class="service-grid">
-        <view class="service-item" v-for="(item, index) in hotServices" :key="index" @click="handleServiceClick(item)">
-          <image :src="item.icon" mode="widthFix"></image>
-          <text>{{item.name}}</text>
+        <view class="service-row">
+          <view class="service-item" v-for="(item, index) in hotServices.slice(0, 3)" :key="index" @click="handleServiceClick(item)">
+            <image :src="item.icon" mode="widthFix"></image>
+            <text>{{item.name}}</text>
+          </view>
+        </view>
+        <view class="service-row" v-if="hotServices.length > 3">
+          <view class="service-item" v-for="(item, index) in hotServices.slice(3)" :key="index + 3" @click="handleServiceClick(item)">
+            <image :src="item.icon" mode="widthFix"></image>
+            <text>{{item.name}}</text>
+          </view>
         </view>
       </view>
     </view>
@@ -101,13 +117,16 @@ export default {
     color: #fff;
     
     .back-icon {
-      width: 40rpx;
-      height: 40rpx;
+      width: 60rpx;
+      height: 60rpx;
+      display: flex;
+      align-items: center;
       margin-right: 20rpx;
       
-      image {
-        width: 100%;
-        height: 100%;
+      .back-text {
+        font-size: 40rpx;
+        font-weight: bold;
+        color: #fff;
       }
     }
     
@@ -124,30 +143,57 @@ export default {
     border-radius: 12rpx;
     
     .section-title {
-      font-size: 28rpx;
-      font-weight: 500;
-      margin-bottom: 20rpx;
+      font-size: 30rpx;
+      font-weight: bold;
+      margin-bottom: 30rpx;
+      padding-left: 20rpx;
+      border-left: 8rpx solid #1890ff;
     }
     
     .service-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 20rpx;
+      .service-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30rpx;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .service-item {
+          flex: 1;
+          margin: 0 10rpx;
+
+          &:first-child {
+            margin-left: 0;
+          }
+
+          &:last-child {
+            margin-right: 0;
+          }
+        }
+      }
       
       .service-item {
         display: flex;
         flex-direction: column;
         align-items: center;
+        padding: 20rpx;
         
         image {
-          width: 80rpx;
-          height: 80rpx;
-          margin-bottom: 10rpx;
+          width: 100rpx;
+          height: 100rpx;
+          margin-bottom: 16rpx;
         }
         
         text {
-          font-size: 24rpx;
+          font-size: 26rpx;
           color: #333;
+          text-align: center;
+        }
+
+        &:active {
+          opacity: 0.7;
         }
       }
     }
@@ -162,6 +208,7 @@ export default {
     background-color: #fff;
     padding: 20rpx;
     border-top: 1rpx solid #eee;
+    box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
     
     .btn {
       flex: 1;
@@ -170,14 +217,18 @@ export default {
       align-items: center;
       
       image {
-        width: 48rpx;
-        height: 48rpx;
-        margin-bottom: 8rpx;
+        width: 56rpx;
+        height: 56rpx;
+        margin-bottom: 10rpx;
       }
       
       text {
-        font-size: 24rpx;
-        color: #666;
+        font-size: 26rpx;
+        color: #333;
+      }
+
+      &:active {
+        opacity: 0.7;
       }
     }
   }

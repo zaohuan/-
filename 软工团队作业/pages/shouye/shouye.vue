@@ -10,7 +10,11 @@
         <image src="/static/search.png" mode="aspectFit" class="search-icon"></image>
       </view>
       <view class="header-icons">
-        <image src="/static/headset-one.png" mode="aspectFit"></image>
+        <image 
+          src="/static/headset-one.png" 
+          mode="aspectFit" 
+          @click="toCustomerService"
+        ></image>
         <image src="/static/message-one.png" mode="aspectFit"></image>
       </view>
     </view>
@@ -76,8 +80,15 @@ export default defineComponent({
       })
     }
 
+    const toCustomerService = () => {
+      uni.navigateTo({
+        url: '/pages/customer-servece/customer-service'
+      })
+    }
+
     return {
-      navigateTo
+      navigateTo,
+      toCustomerService
     }
   }
 })

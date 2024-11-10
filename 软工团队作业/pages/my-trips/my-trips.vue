@@ -49,7 +49,9 @@
 		},
 		methods: {
 			goBack() {
-				uni.navigateBack()
+				uni.switchTab({
+					url: '/pages/shouye/shouye'
+				})
 			},
 			goToTripDetail(trip) {
 				uni.navigateTo({

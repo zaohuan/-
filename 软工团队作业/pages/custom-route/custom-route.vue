@@ -14,9 +14,9 @@
       <view class="form-item">
         <text class="label">时间：</text>
         <view class="date-picker">
-          <input type="text" placeholder="如2024/10/25" v-model="formData.startDate" />
+          <input type="text" placeholder="如2024/10/25" v-value="formData.startDate" />
           <text class="separator">至</text>
-          <input type="text" placeholder="如2024/11/04" v-model="formData.endDate" />
+          <input type="text" placeholder="如2024/11/04" v-value="formData.endDate" />
         </view>
       </view>
 
@@ -24,9 +24,9 @@
       <view class="form-item">
         <text class="label">预算：</text>
         <view class="budget-input">
-          <input type="number" placeholder="请输入数字" v-model="formData.budgetMin" />
+          <input type="number" placeholder="请输入数字" v-value="formData.budgetMin" />
           <text class="separator">—</text>
-          <input type="number" placeholder="请输入数字" v-model="formData.budgetMax" />
+          <input type="number" placeholder="请输入数字" v-value="formData.budgetMax" />
           <text>元</text>
         </view>
       </view>
@@ -37,7 +37,7 @@
       <view class="checkbox-group">
         <view class="checkbox-item">
           <text>无障碍设施：</text>
-          <radio-group v-model="formData.accessibility">
+          <radio-group v-value="formData.accessibility">
             <radio value="yes">是</radio>
             <radio value="no">否</radio>
           </radio-group>
@@ -45,7 +45,7 @@
 
         <view class="checkbox-item">
           <text>亲子友好：</text>
-          <radio-group v-model="formData.familyFriendly">
+          <radio-group v-value="formData.familyFriendly">
             <radio value="yes">是</radio>
             <radio value="no">否</radio>
           </radio-group>
@@ -53,7 +53,7 @@
 
         <view class="checkbox-item">
           <text>宠物友好：</text>
-          <radio-group v-model="formData.petFriendly">
+          <radio-group v-value="formData.petFriendly">
             <radio value="yes">是</radio>
             <radio value="no">否</radio>
           </radio-group>
@@ -66,32 +66,32 @@
         <view class="form-item">
           <text class="required">*</text>
           <text>自然景观：</text>
-          <input type="text" placeholder="如草原/海滩/雪山" v-model="formData.naturalScenery" />
+          <input type="text" placeholder="如草原/海滩/雪山" v-value="formData.naturalScenery" />
         </view>
 
         <view class="form-item">
           <text class="required">*</text>
           <text>社会景观：</text>
-          <input type="text" placeholder="如纪念馆/博物馆/科技馆" v-model="formData.culturalSites" />
+          <input type="text" placeholder="如纪念馆/博物馆/科技馆" v-value="formData.culturalSites" />
         </view>
 
         <view class="form-item">
           <text class="required">*</text>
           <text>周边饮食：</text>
-          <input type="text" placeholder="如闽菜/川菜/粤菜" v-model="formData.food" />
+          <input type="text" placeholder="如闽菜/川菜/粤菜" v-value="formData.food" />
         </view>
 
         <view class="form-item">
           <text class="required">*</text>
           <text>其余需求：</text>
-          <input type="text" placeholder="填写对景点的其余需求" v-model="formData.otherRequirements" />
+          <input type="text" placeholder="填写对景点的其余需求" v-value="formData.otherRequirements" />
         </view>
       </view>
 
       <!-- 提交按钮 -->
       <button class="submit-btn" @click="submitForm">
-        提交
-        <text class="btn-sub">获得景点推荐</text>
+        提交获得景点推荐
+        
       </button>
     </view>
   </view>
@@ -219,20 +219,19 @@ radio-group {
 }
 
 .submit-btn {
-  margin-top: 30px;
+  margin-top: 10px;
   width: 100%;
+  height:70px;
   background-color: #007AFF;
   color: white;
   border: none;
-  padding: 15px;
+  padding: 10px;
   border-radius: 25px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  
 }
 
-.btn-sub {
-  font-size: 12px;
-  margin-top: 5px;
-}
+
 </style> 

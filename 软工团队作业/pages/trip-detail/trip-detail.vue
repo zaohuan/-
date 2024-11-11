@@ -103,15 +103,9 @@
 		},
 		methods: {
 			goBack() {
-				// 直接跳转到我的行程页面
-				uni.navigateTo({
-					url: '/pages/my-trips/my-trips',
-					fail: () => {
-						// 如果跳转失败，尝试重定向
-						uni.redirectTo({
-							url: '/pages/my-trips/my-trips'
-						})
-					}
+				// 返回上一页面，即my-trips页面
+				uni.navigateBack({
+					delta: 1  // delta: 1 表示返回到上一个页面
 				})
 			},
 			goToDetailedPlan() {

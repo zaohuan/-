@@ -59,10 +59,8 @@
 				})
 			},
 			modifyTrip() {
-				// 处理修改行程的逻辑
-				uni.showToast({
-					title: '修改行程',
-					icon: 'none'
+				uni.navigateTo({
+					url: '/pages/trip-modify/trip-modify'
 				})
 			}
 		}

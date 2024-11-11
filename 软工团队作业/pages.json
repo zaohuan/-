@@ -98,6 +98,13 @@
 				"navigationBarTitleText": "行程详情",
 				"navigationStyle": "custom"
 			}
+		},
+		{
+			
+			"path": "pages/trip-modify/trip-modify",
+			"style": {
+				"navigationBarTitleText": "修改行程"
+			}
 		}
 	]
 	//"globalStyle": {

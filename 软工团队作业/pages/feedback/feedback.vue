@@ -48,69 +48,168 @@
 	</view>
 </template>
 
-<script>
-	export default {
-		data() {
-			return {
-				messageInput: '',
-				chatMessages: [
-					{
-						type: 'received',
-						content: '您好，我是智能客服助手，很高兴为您服务！'
-					}
-				],
-				showRating: false,
-				selectedRating: -1,
-				ratingOptions: [
-					{ label: '很不满', icon: '/static/icons/rating-1.png' },
-					{ label: '不满', icon: '/static/icons/rating-2.png' },
-					{ label: '一般', icon: '/static/icons/rating-3.png' },
-					{ label: '满意', icon: '/static/icons/rating-4.png' },
-					{ label: '很满意', icon: '/static/icons/rating-5.png' }
-				]
-			}
-		},
-		methods: {
-			goBack() {
-				uni.navigateBack()
-			},
-			sendMessage() {
-				if (!this.messageInput.trim()) return
-				
-				this.chatMessages.push({
-					type: 'sent',
-					content: this.messageInput
-				})
-				
-				setTimeout(() => {
-					this.chatMessages.push({
-						type: 'received',
-						content: '您的问题已收到，请稍候...'
-					})
-				}, 500)
-				
-				this.messageInput = ''
-			},
-			toggleRating() {
-				this.showRating = !this.showRating
-			},
-			selectRating(index) {
-				this.selectedRating = index
-				setTimeout(() => {
-					this.showRating = false
-					uni.showToast({
-						title: '感谢您的评价',
-						icon: 'success'
-					})
-				}, 500)
-			},
-			makePhoneCall() {
-				uni.makePhoneCall({
-					phoneNumber: '400-XXX-XXXX'
-				})
+<script lang="ts">
+import { defineComponent } from 'vue'
+import { 
+  ChatMessage, 
+  ChatHistory, 
+  WenxinRequestParams, 
+  WenxinResponse,
+  ServiceConfig,
+  AccessTokenResponse 
+} from '@/types/feedback'
+
+export default defineComponent({
+	data() {
+		return {
+			messageInput: '',
+			chatMessages: [] as ChatMessage[],
+			showRating: false,
+			selectedRating: -1,
+			ratingOptions: [
+				{ label: '很不满', icon: '/static/icons/rating-1.png' },
+				{ label: '不满', icon: '/static/icons/rating-2.png' },
+				{ label: '一般', icon: '/static/icons/rating-3.png' },
+				{ label: '满意', icon: '/static/icons/rating-4.png' },
+				{ label: '很满意', icon: '/static/icons/rating-5.png' }
+			],
+			wenxinConfig: {
+				systemPrompt: '你是一个专业的客服助手，擅长解答用户问题。请用简洁友善的语气回答。',
+				maxHistoryLength: 10,
+				temperature: 0.7,
+				top_p: 0.8
+			} as ServiceConfig,
+			sessionInfo: {
+				sessionId: '',
+				userId: '',
+				chatHistory: [] as ChatHistory['messages']
 			}
 		}
+	},
+	methods: {
+		goBack() {
+			uni.navigateBack()
+		},
+		async sendToWenxin(userMessage: string): Promise<WenxinResponse> {
+			//该方法用于发送用户消息到文心一言API
+			const params: WenxinRequestParams = {
+				messages: [
+					{
+						role: 'system',
+						content: this.wenxinConfig.systemPrompt
+					},
+					...this.sessionInfo.chatHistory,
+					{
+						role: 'user',
+						content: userMessage
+					}
+				],
+				temperature: this.wenxinConfig.temperature,
+				top_p: this.wenxinConfig.top_p,
+				user_id: this.sessionInfo.userId
+			}
+			
+			// 实际API调用部分需要在后端实现
+			return await wenxinApiCall(params)
+		},
+		async sendMessage() {
+			//该方法用于处理用户消息的发送
+			if (!this.messageInput.trim()) return;
+			
+			const userMessage: ChatMessage = {
+				type: 'sent',
+				content: this.messageInput,
+				timestamp: Date.now(),
+				messageId: Math.random().toString(36).substring(2)
+			};
+			this.chatMessages.push(userMessage);
+			
+			this.sessionInfo.chatHistory.push({
+				role: 'user',
+				content: this.messageInput
+			});
+			
+			this.messageInput = '';
+			
+			const loadingMessage: ChatMessage = {
+				type: 'received',
+				content: '正在思考中...',
+				timestamp: Date.now(),
+				messageId: Math.random().toString(36).substring(2)
+			};
+			this.chatMessages.push(loadingMessage);
+			
+			const aiResponse = await this.sendToWenxin(userMessage.content);
+			
+			this.sessionInfo.chatHistory.push({
+				role: 'assistant',
+				content: aiResponse.result
+			});
+			
+			this.chatMessages.pop();
+			const aiResponseMessage: ChatMessage = {
+				type: 'received',
+				content: aiResponse.result,
+				timestamp: Date.now(),
+				messageId: Math.random().toString(36).substring(2)
+			};
+			this.chatMessages.push(aiResponseMessage);
+			
+			if (this.sessionInfo.chatHistory.length > this.wenxinConfig.maxHistoryLength) {
+				this.sessionInfo.chatHistory = this.sessionInfo.chatHistory.slice(-this.wenxinConfig.maxHistoryLength);
+			}
+		},
+		toggleRating() {
+			//控制评分界面的显示和隐藏
+			this.showRating = !this.showRating
+		},
+		selectRating(index: number) {
+			this.selectedRating = index
+			setTimeout(() => {
+				this.showRating = false
+				uni.showToast({
+					title: '感谢您的评价',
+					icon: 'success'
+				})
+			}, 500)
+		},
+		makePhoneCall() {
+			//用于发起电话拨打
+			uni.makePhoneCall({
+				phoneNumber: '400-XXX-XXXX'
+			})
+		},
+		async getAccessToken() {
+			try {
+				const response = await uni.request({
+					url: 'YOUR_BACKEND_API/get-wenxin-token',
+					method: 'GET'
+				});
+				
+				// 使用类型断言来确保 response.data 的类型
+				const tokenResponse = response.data as AccessTokenResponse;
+				
+				if (tokenResponse && tokenResponse.access_token) {
+					this.wenxinConfig.accessToken = tokenResponse.access_token;
+					if (tokenResponse.expires_in) {
+						setTimeout(() => {
+							this.getAccessToken(); // token过期前自动刷新
+						}, (tokenResponse.expires_in - 60) * 1000); // 提前60秒刷新
+					}
+				}
+			} catch (error) {
+				console.error('获取access_token失败:', error);
+			}
+		}
+	},
+	created() {
+		//在组件创建时调用 getAccessToken() 方法，获取并设置 access_token
+		this.getAccessToken();
 	}
+})
+function wenxinApiCall(_params: WenxinRequestParams): WenxinResponse | PromiseLike<WenxinResponse> {
+	throw new Error('Function not implemented.')
+}
 </script>
 
 <style lang="scss" scoped>

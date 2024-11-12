@@ -7,7 +7,7 @@
       <!-- 目的地 -->
       <view class="form-item">
         <text class="label">目的地：</text>
-        <input type="text" placeholder="如福建省福州市鼓楼区，仅限国内" v-model="formData.destination" />
+        <input type="text" placeholder="如福建省福州市鼓楼区，仅限国内" v-value="formData.destination" />
       </view>
 
       <!-- 时间选择 -->
@@ -45,7 +45,7 @@
 
         <view class="checkbox-item">
           <text>亲子友好：</text>
-          <radio-group v-value="formData.familyFriendly">
+          <radio-group v-value="formData.kidFriendly">
             <radio value="yes">是</radio>
             <radio value="no">否</radio>
           </radio-group>
@@ -66,25 +66,25 @@
         <view class="form-item">
           <text class="required">*</text>
           <text>自然景观：</text>
-          <input type="text" placeholder="如草原/海滩/雪山" v-value="formData.naturalScenery" />
+          <input type="text" placeholder="如草原/海滩/雪山" v-value="formData.naturalLandscape" />
         </view>
 
         <view class="form-item">
           <text class="required">*</text>
           <text>社会景观：</text>
-          <input type="text" placeholder="如纪念馆/博物馆/科技馆" v-value="formData.culturalSites" />
+          <input type="text" placeholder="如纪念馆/博物馆/科技馆" v-value="formData.socialLandscape" />
         </view>
 
         <view class="form-item">
           <text class="required">*</text>
           <text>周边饮食：</text>
-          <input type="text" placeholder="如闽菜/川菜/粤菜" v-value="formData.food" />
+          <input type="text" placeholder="如闽菜/川菜/粤菜" v-value="formData.cuisine" />
         </view>
 
         <view class="form-item">
           <text class="required">*</text>
           <text>其余需求：</text>
-          <input type="text" placeholder="填写对景点的其余需求" v-value="formData.otherRequirements" />
+          <input type="text" placeholder="填写对景点的其余需求" v-value="formData.otherNeeds" />
         </view>
       </view>
 
@@ -109,12 +109,12 @@ export default defineComponent({
       budgetMin: '',
       budgetMax: '',
       accessibility: 'no',
-      familyFriendly: 'no',
+      kidFriendly: 'no',
       petFriendly: 'no',
-      naturalScenery: '',
-      culturalSites: '',
-      food: '',
-      otherRequirements: ''
+      naturalLandscape: '',
+      socialLandscape: '',
+      cuisine: '',
+      otherNeeds: ''
     })
 
     const submitForm = () => {

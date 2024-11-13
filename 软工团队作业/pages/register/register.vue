@@ -1,6 +1,7 @@
 <template>
   <view class="container">
     <view class="form">
+      <!-- A-FR-001: 用户必须通过有效的账号和密码进行身份认证 -->
       <input class='reg_input1'
         v-model="username" 
         placeholder="请输入用户名" 
@@ -22,6 +23,7 @@
         name="confirmPassword" 
       />
       <button class="reg_button1" @click="register" :disabled="loading">注册</button>
+      <!-- A-FR-004: 登录失败时应提供明确的错误提示 -->
       <text v-if="errorMessage">{{ errorMessage }}</text>
       <view v-if="loading" class="loading-spinner">
         <div class="spinner"></div> <!-- 旋转加载器 -->
@@ -44,10 +46,12 @@ export default {
   },
   methods: {
     async register() {
+      // A-FR-001: 用户必须通过有效的账号和密码进行身份认证
       if (!this.username || !this.password || !this.confirmPassword) {
         this.errorMessage = '所有字段不能为空';
         return;
       }
+
       if (this.password !== this.confirmPassword) {
         this.errorMessage = '密码和确认密码不一致';
         return;
@@ -56,6 +60,7 @@ export default {
       this.loading = true; // 设置加载状态为 true
 
       try {
+        // A-FR-002: 系统应根据用户的角色权限进行访问控制
         const response = await uniCloud.callFunction({
           name: 'registeruser',
           data: {

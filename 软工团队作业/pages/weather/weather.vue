@@ -148,6 +148,8 @@ export default {
             }
         }
     },
+	
+// 产品功能编号：FUNC-007，系统应自动获取用户旅行目的地的实时天气信息。
     methods: {
         // 获取当前位置并显示天气
         async getCurrentLocationWeather() {
@@ -222,6 +224,7 @@ export default {
             }
         },
 
+// 需求编号:WT-FR-002  ,系统应自动从天气API获取实时天气数据。
         // 使用坐标获取天气数据
         async getWeatherByCoords() {
             try {
@@ -331,6 +334,9 @@ export default {
             return `${formatTime(sunrise)}/${formatTime(sunset)}`;
         },
 
+
+
+//  需求编号： WT-FR-003，系统应根据用户的旅行日期预测未来天气。
         // 格式化预报数据
         formatForecastData(dailyData) {
             return dailyData.slice(1, 6).map(day => ({

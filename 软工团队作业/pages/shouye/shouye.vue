@@ -3,7 +3,7 @@
     <!-- 顶部导航栏 -->
     <view class="header">
       <view class="avatar">
-        <image src="/static/me.png" mode="aspectFit"></image>
+        <image src="/static/me.png" mode="aspectFit" @click="navigateTo('/pages/gerenxinxi/gerenxinxi')"></image>
       </view>
       <view class="search-box">
         <input type="text" placeholder="输入城市" />

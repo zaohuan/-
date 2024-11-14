@@ -105,6 +105,13 @@
 			"style": {
 				"navigationBarTitleText": "修改行程"
 			}
+		},
+		{
+			"path" : "pages/gerenxinxi/gerenxinxi",
+			"style" : 
+			{
+				"navigationBarTitleText" : "个人信息"
+			}
 		}
 	]
 	//"globalStyle": {

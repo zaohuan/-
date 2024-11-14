@@ -1,12 +1,14 @@
 <template>
   <view class="container">
     <view class="form">
+      <!-- A-FR-003: 用户通过输入账号和密码完成登录 -->
       <input class="login_input1" v-model="username" placeholder="请输入用户名" />
       <input class="login_input1" v-model="password" placeholder="请输入密码" type="password" />
       <button class="login_button1" @click="login" :disabled="loading">登录</button>
+      <!-- A-FR-004: 登录失败时应提供明确的错误提示 -->
       <text  v-if="errorMessage">{{ errorMessage }}</text>
       <view v-if="loading" class="loading-spinner">
-        <div class="spinner"></div> <!-- 旋转加载器 -->
+        <div class="spinner"></div>
         <text>加载中...</text>
       </view>
     </view>
@@ -25,6 +27,7 @@ export default {
   },
   methods: {
     async login() {
+      // A-FR-001: 用户必须通过有效的账号和密码进行身份认证
       if (!this.username || !this.password) {
         this.errorMessage = '用户名和密码不能为空';
         return;
@@ -49,6 +52,7 @@ export default {
 			  key: 'username', // 存储的键
 			  data: this.username, // 存储的值
 		  });
+      // A-FR-002: 系统应根据用户的角色权限进行访问控制
           uni.setStorage({
             key: 'userInfo',
             data: response.result.userInfo,

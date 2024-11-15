@@ -4,12 +4,12 @@
         <view class="route-section">
             <view class="section-title">当前路线</view>
             <view class="route-list">
-                <view class="route-item" v-for="(spot, index) in routeData" :key="index">
+                <view class="route-item" v-for="(spot, index) in routeData.spots" :key="index">
                     <view class="spot-container">
                         <view class="spot-number">{{index + 1}}</view>
-                        <text class="spot-name">{{spot}}</text>
+                        <text class="spot-name">{{spot.name}}</text>
                     </view>
-                    <view v-if="index !== routeData.length - 1" class="arrow-container">
+                    <view v-if="index !== routeData.spots.length - 1" class="arrow-container">
                         <image 
                             src="/static/arrow-right.png" 
                             class="arrow-icon"
@@ -46,112 +46,178 @@
     </view>
 </template>
 
-<script>
-    export default {
-        data() {
-            return {
-                routeData: [],  // 路线数据
-                weatherData: [], // 天气数据
-                suggestion: '',  // 建议内容
-                timeInterval: null // 用于存储定时器ID
-            }
-        },
-        methods: {
-            // 获取未来6小时的时间段
-            getNextSixHours() {
-                const hours = [];
-                const now = new Date();
-                // 获取当前小时
-                let currentHour = now.getHours();
-                
-                // 总是从下一个整点开始
-                currentHour += 1;
-                
-                // 获取接下来6个整点时间
-                for (let i = 0; i < 6; i++) {
-                    let hour = (currentHour + i) % 24;  // 使用模运算处理跨天的情况
-                    hours.push(`${String(hour).padStart(2, '0')}:00`);
-                }
-                
-                return hours;
-            },
+<script lang="ts">
+// 添加接口定义
+interface SpotItem {
+    name: string
+    isAdjusted?: boolean
+}
 
-            // 启动定时器更新时间
-            startTimeUpdate() {
-                // 立即执行一次更新
-                this.updateTimeSlots();
-                
-                // 每分钟更新一次
-                this.timeInterval = setInterval(() => {
-                    this.updateTimeSlots();
-                }, 60000); // 60000毫秒 = 1分钟
-            },
+interface RouteData {
+    title: string
+    spots: SpotItem[]
+}
 
-            // 更新时间槽
-            updateTimeSlots() {
-                const timeSlots = this.getNextSixHours();
-                // 更新天气数据中的时间
-                this.weatherData = timeSlots.map((time, index) => {
-                    const weatherTypes = ['小雨', '多云', '雷雨', '降雪', '晴天', '晴天'];
-                    return {
-                        time: time,
-                        weather: weatherTypes[index]
-                    };
-                });
-            },
+interface WeatherItem {
+    time: string
+    weather: string
+    temperature?: number
+}
 
-            // 获取路线和天气数据的接口
-            async getRealtimeData() {
-                try {
-                    // 这里等待后端接口
-                    // const response = await uni.request({
-                    //     url: 'YOUR_API_URL',
-                    //     method: 'GET'
-                    // });
-                    // this.routeData = response.data.route;
-                    // this.weatherData = response.data.weather;
-                    // this.suggestion = response.data.suggestion;
-                    
-                    // 临时使用模拟数据
-                    this.routeData = ['三坊七巷', '福州博物馆', '西湖公园', '南后街'];
-                    
-                    // 初始化时间和天气数据
-                    this.updateTimeSlots();
-                    
-                    this.suggestion = '由于14：30左右会下小雨，建议改为参观室内景点，如林则徐纪念馆。';
-                    
-                } catch (e) {
-                    uni.showToast({
-                        title: '获取实时信息失败',
-                        icon: 'none'
-                    });
-                }
-            },
-            
-            // 获取天气图标
-            getWeatherIcon(weather) {
-                const iconMap = {
-                    '晴天': '/static/sunny.png',
-                    '多云': '/static/cloudy.png',
-                    '小雨': '/static/light-rain.png',
-                    '大雨': '/static/heavy-rain.png',
-                    '雷雨': '/static/thunder.png',
-                    '降雪': '/static/snow.png'
-                }
-                return iconMap[weather] || '/static/sunny.png'
-            }
-        },
-        onLoad() {
-            this.getRealtimeData();
-            this.startTimeUpdate();
-        },
-        onUnload() {
-            // 清理定时器
-            if (this.timeInterval) {
-                clearInterval(this.timeInterval);
+export default {
+    data() {
+        return {
+            routeData: {
+                title: '',
+                spots: []
+            } as RouteData,
+            weatherData: [] as WeatherItem[], // 天气数据
+            suggestion: '',  // 建议内容
+            timeInterval: null as number | null, // 用于存储定时器ID
+            apiConfig: {
+                openWeatherKey: 'YOUR_OPENWEATHER_API_KEY',
+                units: 'metric',
+                lang: 'zh_cn'
             }
         }
+    },
+    methods: {
+        // 获取未来6小时的时间段
+        getNextSixHours() {
+            const hours = [];
+            const now = new Date();
+            // 获取当前小时
+            let currentHour = now.getHours();
+            
+            // 总是从下一个整点开始
+            currentHour += 1;
+            
+            // 获取接下来6个整点时间
+            for (let i = 0; i < 6; i++) {
+                let hour = (currentHour + i) % 24;  // 使用模运算处理跨天的情况
+                hours.push(`${String(hour).padStart(2, '0')}:00`);
+            }
+            
+            return hours;
+        },
+
+        // 启动定时器更新时间
+        startTimeUpdate() {
+            // 立即执行一次更新
+            this.updateTimeSlots();
+            
+            // 每分钟更新一次
+            this.timeInterval = setInterval(() => {
+                this.updateTimeSlots();
+            }, 60000); // 60000毫秒 = 1分钟
+        },
+
+        // 更新时间槽
+        updateTimeSlots() {
+            const timeSlots = this.getNextSixHours();
+            // 更新天气数据中的时间
+            this.weatherData = timeSlots.map((time, index) => {
+                const weatherTypes = ['小雨', '多云', '雷雨', '降雪', '晴天', '晴天'];
+                return {
+                    time: time,
+                    weather: weatherTypes[index]
+                };
+            });
+        },
+
+        // 获取路线和天气数据的接口
+        async getRealtimeData() {
+            try {
+                this.routeData = {
+                    title: '当前路线',
+                    spots: [
+                        { name: '三坊七巷' },
+                        { name: '福州博物馆' },
+                        { name: '西湖公园' },
+                        { name: '南后街' }
+                    ]
+                }
+                
+                // 获取天气数据
+                const weatherResponse = await uni.request({
+                    url: 'https://api.openweathermap.org/data/2.5/onecall',
+                    method: 'GET',
+                    data: {
+                        lat: getApp().globalData.location.lat, // 从全局获取位置信息
+                        lon: getApp().globalData.location.lon,
+                        appid: this.apiConfig.openWeatherKey,
+                        units: this.apiConfig.units,
+                        lang: this.apiConfig.lang
+                    }
+                });
+
+                if (weatherResponse.data && weatherResponse.data.hourly) {
+                    // 处理未来6小时的天气数据
+                    const timeSlots = this.getNextSixHours();
+                    this.weatherData = timeSlots.map((time, index) => {
+                        const hourData = weatherResponse.data.hourly[index];
+                        return {
+                            time: time,
+                            weather: hourData.weather[0].description,
+                            temperature: Math.round(hourData.temp)
+                        };
+                    });
+
+                    // 生成建议
+                    this.generateSuggestion(weatherResponse.data.hourly);
+                }
+                
+            } catch (e) {
+                console.error('获取实时信息失败:', e);
+                uni.showToast({
+                    title: '获取实时信息失败',
+                    icon: 'none'
+                });
+            }
+        },
+
+        // 添加生成建议的方法
+        generateSuggestion(hourlyData) {
+            // 检查未来几小时是否有不利天气
+            const badWeather = hourlyData.slice(0, 6).find(hour => 
+                hour.weather[0].main === 'Rain' || 
+                hour.weather[0].main === 'Snow' || 
+                hour.weather[0].main === 'Thunderstorm'
+            );
+
+            if (badWeather) {
+                const hour = new Date(badWeather.dt * 1000).getHours();
+                const weatherDesc = badWeather.weather[0].description;
+                this.suggestion = `由于${hour}:00左右会${weatherDesc}，建议改为参观室内景点，如博物馆等。`;
+            } else {
+                this.suggestion = '近期天气适宜，可以按原定计划游览。';
+            }
+        },
+
+        // 获取天气图标
+        getWeatherIcon(weather) {
+            const iconMap = {
+                '晴天': '/static/sunny.png',
+                '多云': '/static/cloudy.png',
+                '小雨': '/static/light-rain.png',
+                '大雨': '/static/heavy-rain.png',
+                '雷雨': '/static/thunder.png',
+                '降雪': '/static/snow.png'
+            }
+            return iconMap[weather] || '/static/sunny.png'
+        }
+    },
+    onLoad() {
+        this.getRealtimeData();
+        this.startTimeUpdate();
+    },
+    onUnload() {
+        // 清理定时器
+        if (this.timeInterval) {
+            clearInterval(this.timeInterval);
+        }
     }
+}
 </script>
 
 <style>

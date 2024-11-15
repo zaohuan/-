@@ -8,7 +8,12 @@
             :key="index"
             @click="navigateToDetail(route)">
         <view class="route-title">{{ route.title }}</view>
-        <view class="route-path">{{ route.path }}</view>
+        <view class="route-path">
+          <template v-for="(spot, spotIndex) in route.spots" :key="spotIndex">
+            <text>{{ spot.name }}</text>
+            <text v-if="spotIndex !== route.spots.length - 1"> → </text>
+          </template>
+        </view>
         <view class="route-budget">预算：{{ route.budget }}元/人</view>
       </view>
     </view>
@@ -18,16 +23,49 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue'
 
+// 统一的数据接口
+interface SpotItem {
+  name: string
+  isAdjusted?: boolean  // 可选,用于标记调整后的景点
+}
+
 interface RouteItem {
-  title: string
-  path: string
-  budget: string
-  spots: string[] // 添加景点数组
+  title: string        // 路线标题
+  spots: SpotItem[]    // 景点数组
+  budget: string      // 可选,用于推荐结果页显示预算
 }
 
 export default defineComponent({
   setup() {
-    const recommendRoutes = ref<RouteItem[]>([])
+    const recommendRoutes = ref<RouteItem[]>([
+      {
+        title: '豪华尊享游',
+        spots: [
+          { name: '鼓山' },
+          { name: '三坊七巷' },
+          { name: '达明美食街' }
+        ],
+        budget: '1460-2780'
+      },
+      {
+        title: '经济适用游',
+        spots: [
+          { name: '鼓山' },
+          { name: '闽江公园' },
+          { name: '万达广场/老街' }
+        ],
+        budget: '860-1280'
+      },
+      {
+        title: '特种兵穷游',
+        spots: [
+          { name: '青云山' },
+          { name: '鼓山' },
+          { name: '达明美食街' }
+        ],
+        budget: '310-580'
+      }
+    ])
 
     const navigateToDetail = (route: RouteItem) => {
       uni.navigateTo({
@@ -45,21 +83,30 @@ export default defineComponent({
       recommendRoutes.value = [
         {
           title: '豪华尊享游',
-          path: '鼓山 → 三坊七巷 → 达明美食街',
-          budget: '1460-2780',
-          spots: ['鼓山', '三坊七巷', '达明美食街']
+          spots: [
+            { name: '鼓山' },
+            { name: '三坊七巷' },
+            { name: '达明美食街' }
+          ],
+          budget: '1460-2780'
         },
         {
           title: '经济适用游',
-          path: '鼓山 → 闽江公园 → 万达广场/老街',
-          budget: '860-1280',
-          spots: ['鼓山', '闽江公园', '万达广场/老街']
+          spots: [
+            { name: '鼓山' },
+            { name: '闽江公园' },
+            { name: '万达广场/老街' }
+          ],
+          budget: '860-1280'
         },
         {
           title: '特种兵穷游',
-          path: '青云山 → 鼓山→ 达明美食街',
-          budget: '310-580',
-          spots: ['青云山', '鼓山', '达明美食街']
+          spots: [
+            { name: '青云山' },
+            { name: '鼓山' },
+            { name: '达明美食街' }
+          ],
+          budget: '310-580'
         }
       ]
     }

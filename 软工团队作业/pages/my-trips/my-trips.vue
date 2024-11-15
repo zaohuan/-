@@ -21,12 +21,15 @@
 				<view class="trip-budget">
 					<text>预算：{{trip.budget}}元/人</text>
 				</view>
+				<view class="trip-actions">
+					<view class="action-btn real-time" @click.stop="realTimeAdjust(trip)">
+						<text>实时调整</text>
+					</view>
+					<view class="action-btn manual" @click.stop="manualModify(trip)">
+						<text>手动修改</text>
+					</view>
+				</view>
 			</view>
-		</view>
-
-		<!-- 修改行程按钮 -->
-		<view class="modify-btn" @click="modifyTrip">
-			<text>修改行程</text>
 		</view>
 	</view>
 </template>
@@ -58,9 +61,14 @@
 					url: `/pages/trip-detail/trip-detail?id=${trip.id}`
 				})
 			},
-			modifyTrip() {
+			realTimeAdjust(trip) {
 				uni.navigateTo({
-					url: '/pages/trip-modify/trip-modify'
+					url: `/pages/real-time-adjust/real-time-adjust?id=${trip.id}`
+				})
+			},
+			manualModify(trip) {
+				uni.navigateTo({
+					url: `/pages/manual-modify/manual-modify?id=${trip.id}`
 				})
 			}
 		}
@@ -132,19 +140,30 @@
 				font-size: 26rpx;
 				color: #666;
 			}
+			
+			.trip-actions {
+				display: flex;
+				justify-content: flex-end;
+				margin-top: 20rpx;
+				gap: 20rpx;
+				
+				.action-btn {
+					padding: 10rpx 30rpx;
+					border-radius: 30rpx;
+					font-size: 24rpx;
+					
+					&.real-time {
+						background-color: #1890ff;
+						color: #fff;
+					}
+					
+					&.manual {
+						background-color: #f0f0f0;
+						color: #666;
+					}
+				}
+			}
 		}
-	}
-
-	.modify-btn {
-		position: fixed;
-		bottom: 40rpx;
-		left: 50%;
-		transform: translateX(-50%);
-		background-color: #1890ff;
-		color: #fff;
-		padding: 20rpx 120rpx;
-		border-radius: 40rpx;
-		font-size: 32rpx;
 	}
 }
 </style>

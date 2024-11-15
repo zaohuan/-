@@ -43,82 +43,57 @@ interface RouteItem {
 
 export default defineComponent({
   setup() {
-    const adjustedRoutes = ref<RouteItem[]>([
-      {
-        title: '豪华尊享游',
-        spots: [
-          { name: '鼓山', isAdjusted: false },
-          { name: '福州博物馆', isAdjusted: true },
-          { name: '达明美食街', isAdjusted: false }
-        ]
-      },
-      {
-        title: '经济适用游',
-        spots: [
-          { name: '鼓山', isAdjusted: false },
-          { name: '林则徐纪念馆', isAdjusted: true },
-          { name: '万达广场', isAdjusted: false }
-        ]
-      },
-      {
-        title: '特种兵穷游',
-        spots: [
-          { name: '青云山', isAdjusted: false },
-          { name: '海峡文化艺术中心', isAdjusted: true },
-          { name: '达明美食街', isAdjusted: false }
-        ]
-      }
-    ])
+        const adjustedRoutes = ref<RouteItem[]>([])
 
-    const adjustmentNote = ref('由于14:00-16:00期间可能有雷阵雨，建议将户外景点调整为室内景点，以确保行程顺利进行。蓝色标记为调整项。')
+        const adjustmentNote = ref('由于14:00-16:00期间可能有雷阵雨，建议将户外景点调整为室内景点，以确保行程顺利进行。蓝色标记为调整项。')
 
-    const navigateToDetail = (route: RouteItem) => {
-      uni.navigateTo({
-        url: '/pages/route-detail/route-detail',
-        success: (res) => {
-          res.eventChannel.emit('acceptRouteData', route)
-        }
-      })
-    }
-
-    const adjustRoute = (originalRoute: RouteItem) => {
-      // 室内景点替换表
-      const indoorSpots: { [key: string]: string } = {
-        '三坊七巷': '福州博物馆',
-        '西湖公园': '林则徐纪念馆',
-        '鼓山': '海峡文化艺术中心'
-      }
-
-      return {
-        title: originalRoute.title,
-        spots: originalRoute.spots.map(spot => {
-          if (indoorSpots[spot.name]) {
-            return {
-              name: indoorSpots[spot.name],
-              isAdjusted: true
+        const navigateToDetail = (route: RouteItem) => {
+          uni.navigateTo({
+            url: '/pages/route-detail/route-detail',
+            success: (res) => {
+              res.eventChannel.emit('acceptRouteData', route)
             }
+          })
+        }
+
+        const adjustRoute = (originalRoute: RouteItem) => {
+          // 室内景点替换表
+          const indoorSpots: { [key: string]: string } = {
+            '三坊七巷': '福州博物馆',
+            '西湖公园': '林则徐纪念馆',
+            '鼓山': '海峡文化艺术中心'
           }
+
           return {
-            name: spot.name,
-            isAdjusted: false
+            title: originalRoute.title,
+            spots: originalRoute.spots.map(spot => {
+              if (indoorSpots[spot.name]) {
+                return {
+                  name: indoorSpots[spot.name],
+                  isAdjusted: true
+                }
+              }
+              return {
+                name: spot.name,
+                isAdjusted: false
+              }
+            })
           }
+        }
+
+        onMounted(() => {
+          const eventChannel = getCurrentPages()[getCurrentPages().length - 1].getOpenerEventChannel()
+          
+          eventChannel.on('acceptRouteData', (route: RouteItem) => {
+            adjustedRoutes.value = [adjustRoute(route)]
+          })
         })
-      }
-    }
 
-    onMounted(() => {
-      const eventChannel = getCurrentPages()[getCurrentPages().length - 1].getOpenerEventChannel()
-      
-      eventChannel.on('acceptRouteData', (route: RouteItem) => {
-        adjustedRoutes.value = [adjustRoute(route)]
-      })
-    })
-
-    return {
-      adjustedRoutes,
-      adjustmentNote,
-      navigateToDetail
-    }
+        return {
+          adjustedRoutes,
+          adjustmentNote,
+          navigateToDetail
+        }
   }
 })
 </script>

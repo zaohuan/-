@@ -37,35 +37,8 @@ interface RouteItem {
 
 export default defineComponent({
   setup() {
-    const recommendRoutes = ref<RouteItem[]>([
-      {
-        title: '豪华尊享游',
-        spots: [
-          { name: '鼓山' },
-          { name: '三坊七巷' },
-          { name: '达明美食街' }
-        ],
-        budget: '1460-2780'
-      },
-      {
-        title: '经济适用游',
-        spots: [
-          { name: '鼓山' },
-          { name: '闽江公园' },
-          { name: '万达广场/老街' }
-        ],
-        budget: '860-1280'
-      },
-      {
-        title: '特种兵穷游',
-        spots: [
-          { name: '青云山' },
-          { name: '鼓山' },
-          { name: '达明美食街' }
-        ],
-        budget: '310-580'
-      }
-    ])
+    // 初始化为空数组，实际数据会在 generateRecommendations 中设置
+    const recommendRoutes = ref<RouteItem[]>([])
 
     const navigateToDetail = (route: RouteItem) => {
       uni.navigateTo({
@@ -76,7 +49,7 @@ export default defineComponent({
       })
     }
 
-    // 处理表单数据并生成推荐路线
+    // 保留这个函数中的数据和逻辑
     const generateRecommendations = (formData: any) => {
       // 这里可以根据表单数据处理逻辑
       // 示例数据，实际应该根据formData来生成

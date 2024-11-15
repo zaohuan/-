@@ -10,16 +10,31 @@
       <!-- 目的地 -->
       <view class="form-item">
         <text class="label">目的地：</text>
-        <input type="text" placeholder="如福建省福州市鼓楼区，仅限国内" v-value="formData.destination" />
+        <input 
+          type="text" 
+          placeholder="如福建省福州市鼓楼区，仅限国内" 
+          :value="formData.destination"
+          @input="e => formData.destination = e.detail.value"
+        />
       </view>
 
       <!-- 时间选择 -->
       <view class="form-item">
         <text class="label">时间：</text>
         <view class="date-picker">
-          <input type="text" placeholder="如2024/10/25" v-value="formData.startDate" />
+          <input 
+            type="text" 
+            placeholder="如2024/10/25" 
+            :value="formData.startDate"
+            @input="e => formData.startDate = e.detail.value"
+          />
           <text class="separator">至</text>
-          <input type="text" placeholder="如2024/11/04" v-value="formData.endDate" />
+          <input 
+            type="text" 
+            placeholder="如2024/11/04" 
+            :value="formData.endDate"
+            @input="e => formData.endDate = e.detail.value"
+          />
         </view>
       </view>
 
@@ -27,9 +42,19 @@
       <view class="form-item">
         <text class="label">预算：</text>
         <view class="budget-input">
-          <input type="number" placeholder="请输入数字" v-value="formData.budgetMin" />
+          <input 
+            type="number" 
+            placeholder="请输入数字" 
+            :value="formData.budgetMin"
+            @input="e => formData.budgetMin = e.detail.value"
+          />
           <text class="separator">—</text>
-          <input type="number" placeholder="请输入数字" v-value="formData.budgetMax" />
+          <input 
+            type="number" 
+            placeholder="请输入数字" 
+            :value="formData.budgetMax"
+            @input="e => formData.budgetMax = e.detail.value"
+          />
           <text>元</text>
         </view>
       </view>
@@ -40,7 +65,7 @@
       <view class="checkbox-group">
         <view class="checkbox-item">
           <text>无障碍设施：</text>
-          <radio-group v-value="formData.accessibility">
+          <radio-group :value="formData.accessibility" @change="e => formData.accessibility = e.detail.value">
             <radio value="yes">是</radio>
             <radio value="no">否</radio>
           </radio-group>
@@ -48,7 +73,7 @@
 
         <view class="checkbox-item">
           <text>亲子友好：</text>
-          <radio-group v-value="formData.kidFriendly">
+          <radio-group :value="formData.kidFriendly" @change="e => formData.kidFriendly = e.detail.value">
             <radio value="yes">是</radio>
             <radio value="no">否</radio>
           </radio-group>
@@ -56,7 +81,7 @@
 
         <view class="checkbox-item">
           <text>宠物友好：</text>
-          <radio-group v-value="formData.petFriendly">
+          <radio-group :value="formData.petFriendly" @change="e => formData.petFriendly = e.detail.value">
             <radio value="yes">是</radio>
             <radio value="no">否</radio>
           </radio-group>
@@ -69,32 +94,51 @@
         <view class="form-item">
           <text class="required">*</text>
           <text>自然景观：</text>
-          <input type="text" placeholder="如草原/海滩/雪山" v-value="formData.naturalLandscape" />
+          <input 
+            type="text" 
+            placeholder="如草原/海滩/雪山" 
+            :value="formData.naturalLandscape"
+            @input="e => formData.naturalLandscape = e.detail.value"
+          />
         </view>
 
         <view class="form-item">
           <text class="required">*</text>
           <text>社会景观：</text>
-          <input type="text" placeholder="如纪念馆/博物馆/科技馆" v-value="formData.socialLandscape" />
+          <input 
+            type="text" 
+            placeholder="如纪念馆/博物馆/科技馆" 
+            :value="formData.socialLandscape"
+            @input="e => formData.socialLandscape = e.detail.value"
+          />
         </view>
 
         <view class="form-item">
           <text class="required">*</text>
           <text>周边饮食：</text>
-          <input type="text" placeholder="如闽菜/川菜/粤菜" v-value="formData.cuisine" />
+          <input 
+            type="text" 
+            placeholder="如闽菜/川菜/粤菜" 
+            :value="formData.cuisine"
+            @input="e => formData.cuisine = e.detail.value"
+          />
         </view>
 
         <view class="form-item">
           <text class="required">*</text>
           <text>其余需求：</text>
-          <input type="text" placeholder="填写对景点的其余需求" v-value="formData.otherNeeds" />
+          <input 
+            type="text" 
+            placeholder="填写对景点的其余需求" 
+            :value="formData.otherNeeds"
+            @input="e => formData.otherNeeds = e.detail.value"
+          />
         </view>
       </view>
 
       <!-- 提交按钮 -->
       <button class="submit-btn" @click="submitForm">
         提交获得景点推荐
-        
       </button>
     </view>
   </view>

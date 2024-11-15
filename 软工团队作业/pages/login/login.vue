@@ -62,8 +62,8 @@ export default {
                 title: '登录成功',
                 icon: 'success'
               });
-              uni.switchTab({
-                url: '/pages/tabbar/shouye/shouye'
+              uni.navigateTo({
+                url: '/pages/shouye/shouye'
               });
             }
           });

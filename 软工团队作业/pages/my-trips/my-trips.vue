@@ -63,7 +63,7 @@
 			},
 			realTimeAdjust(trip) {
 				uni.navigateTo({
-					url: `/pages/real-time-adjust/real-time-adjust?id=${trip.id}`
+					url: `/pages/realtime/realtime?id=${trip.id}`
 				})
 			},
 			manualModify(trip) {
@@ -150,7 +150,7 @@
 				.action-btn {
 					padding: 10rpx 30rpx;
 					border-radius: 30rpx;
-					font-size: 24rpx;
+					font-size: 27rpx;
 					
 					&.real-time {
 						background-color: #1890ff;

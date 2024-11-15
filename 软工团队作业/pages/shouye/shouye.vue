@@ -1,4 +1,9 @@
 <template>
+	<view class="daohang">
+		<text class="t—daohang">
+			行趣
+		</text>
+	</view>
   <view class="container">
     <!-- 顶部导航栏 -->
     <view class="header">
@@ -95,6 +100,16 @@ export default defineComponent({
 </script>
 
 <style scoped>
+	.daohang{
+		
+		width:100%;
+		height:40px;
+		background-color: #fff;
+		display:flex;
+		align-items: center;
+		justify-content: center;
+		background-color: #f5f5f5;
+	}
 .container {
   padding: 20px;
   background-color: #fff;
@@ -218,5 +233,10 @@ export default defineComponent({
 .city-stats {
   color: #666;
   font-size: 14px;
+}
+
+.t—daohang {
+	
+  text-align: center;
 }
 </style> 

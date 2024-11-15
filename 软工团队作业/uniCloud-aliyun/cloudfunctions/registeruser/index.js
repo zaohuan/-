@@ -19,9 +19,9 @@ exports.main = async (event, context) => {
 		const result = await db.collection('users').add({
 			username,
 			password: hashedPassword,
-			realname: '',    // 默认值
-			academy: '',     // 默认值
-			identity: '',    // 默认值
+			phone: '',    // 默认值
+			signature: '',     // 默认值
+			   
 			created_at: new Date()
 		});
 

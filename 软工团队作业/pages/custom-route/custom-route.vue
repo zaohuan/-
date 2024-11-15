@@ -164,19 +164,61 @@ export default defineComponent({
       otherNeeds: ''
     })
 
-    const submitForm = () => {
-      // 这里可以添加表单验证逻辑
-      
-      // 跳转到推荐结果页面并传递数据
-      uni.navigateTo({
-        url: '/pages/tuijianjieguo/tuijianjieguo',
-        success: (res) => {
-          // 通过eventChannel向被打开页面传送数据
-          res.eventChannel.emit('acceptFormData', formData)
-        }
-      })
-    }
-
+    const submitForm = async () => {
+      // 表单验证（可以根据需要进行具体的表单验证）
+    	const budgetMin = parseFloat(formData.budgetMin);
+    	const budgetMax = parseFloat(formData.budgetMax);
+    	if (isNaN(budgetMin)) {
+    	    formData.budgetMin = 0;
+    	  } else {
+    	    formData.budgetMin = budgetMin;
+    	  }
+    	
+    	  if (isNaN(budgetMax)) {
+    	    formData.budgetMax = 0;
+    	  } else {
+    	    formData.budgetMax = budgetMax;
+    	  }
+    	  
+      try {
+        const db = uniCloud.database();
+        const collection = db.collection('travel_plan'); // 假设你创建了一个集合名为 travel_plan
+    
+        // 提交数据到云数据库
+        await collection.add({
+          destination: formData.destination,
+          startDate: formData.startDate,
+          endDate: formData.endDate,
+          budgetMin: formData.budgetMin,
+          budgetMax: formData.budgetMax,
+          accessibility: formData.accessibility,
+          kidFriendly: formData.kidFriendly,
+          petFriendly: formData.petFriendly,
+          naturalLandscape: formData.naturalLandscape,
+          socialLandscape: formData.socialLandscape,
+          cuisine: formData.cuisine,
+          otherNeeds: formData.otherNeeds,
+          // 添加其他可能的字段
+          createTime: new Date(), // 保存提交时间
+        });
+    
+        // 提交成功后跳转到推荐结果页面
+        uni.navigateTo({
+          url: '/pages/tuijianjieguo/tuijianjieguo',
+          success: (res) => {
+            // 通过 eventChannel 向被打开页面传送数据
+            res.eventChannel.emit('acceptFormData', formData);
+          },
+        });
+      } catch (error) {
+        console.error('提交失败', error);
+        uni.showToast({
+          title: '提交失败，请重试',
+          icon: 'none',
+        });
+      }
+    };
+	
     return {
       formData,
       submitForm

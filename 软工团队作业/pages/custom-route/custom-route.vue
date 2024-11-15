@@ -1,240 +1,236 @@
-<!-- PTR-FR-001 -->
-
-
 <template>
-  <view class="container">
-    <view class="form-container">
-      <!-- 旅游计划输入区域 -->
-      <view class="form-title">请填写您的旅游计划</view>
-
-      <!-- 目的地 -->
-      <view class="form-item">
-        <text class="label">目的地：</text>
-        <input type="text" placeholder="如福建省福州市鼓楼区，仅限国内" v-value="formData.destination" />
+  <view class="customer-service">
+    <!-- 顶部导航栏 -->
+    <view class="header">
+      <view class="back-icon" @click="goBack">
+        <text class="back-text">＜</text>
       </view>
+      <text class="title">智能客服中心</text>
+    </view>
 
-      <!-- 时间选择 -->
-      <view class="form-item">
-        <text class="label">时间：</text>
-        <view class="date-picker">
-          <input type="text" placeholder="如2024/10/25" v-value="formData.startDate" />
-          <text class="separator">至</text>
-          <input type="text" placeholder="如2024/11/04" v-value="formData.endDate" />
+    <!-- 推荐服务区域 -->
+    <view class="service-section">
+      <text class="section-title">推荐服务</text>
+      <view class="service-grid">
+        <view class="service-row">
+          <view class="service-item" v-for="(item, index) in recommendServices.slice(0, 3)" :key="index" @click="handleServiceClick(item)">
+            <image :src="item.icon" mode="widthFix"></image>
+            <text>{{item.name}}</text>
+          </view>
         </view>
-      </view>
-
-      <!-- 预算 -->
-      <view class="form-item">
-        <text class="label">预算：</text>
-        <view class="budget-input">
-          <input type="number" placeholder="请输入数字" v-value="formData.budgetMin" />
-          <text class="separator">—</text>
-          <input type="number" placeholder="请输入数字" v-value="formData.budgetMax" />
-          <text>元</text>
+        <view class="service-row">
+          <view class="service-item" v-for="(item, index) in recommendServices.slice(3, 6)" :key="index + 3" @click="handleServiceClick(item)">
+            <image :src="item.icon" mode="widthFix"></image>
+            <text>{{item.name}}</text>
+          </view>
         </view>
       </view>
+    </view>
 
-      <!-- 特殊需求选项 -->
-      <view class="form-title sub">请勾选您对旅游景点的要求</view>
-      
-      <view class="checkbox-group">
-        <view class="checkbox-item">
-          <text>无障碍设施：</text>
-          <radio-group v-value="formData.accessibility">
-            <radio value="yes">是</radio>
-            <radio value="no">否</radio>
-          </radio-group>
+    <!-- 热门资讯区域 -->
+    <view class="service-section">
+      <text class="section-title">热门资讯</text>
+      <view class="service-grid">
+        <view class="service-row">
+          <view class="service-item" v-for="(item, index) in hotServices.slice(0, 3)" :key="index" @click="handleServiceClick(item)">
+            <image :src="item.icon" mode="widthFix"></image>
+            <text>{{item.name}}</text>
+          </view>
         </view>
-
-        <view class="checkbox-item">
-          <text>亲子友好：</text>
-          <radio-group v-value="formData.kidFriendly">
-            <radio value="yes">是</radio>
-            <radio value="no">否</radio>
-          </radio-group>
-        </view>
-
-        <view class="checkbox-item">
-          <text>宠物友好：</text>
-          <radio-group v-value="formData.petFriendly">
-            <radio value="yes">是</radio>
-            <radio value="no">否</radio>
-          </radio-group>
+        <view class="service-row" v-if="hotServices.length > 3">
+          <view class="service-item" v-for="(item, index) in hotServices.slice(3)" :key="index + 3" @click="handleServiceClick(item)">
+            <image :src="item.icon" mode="widthFix"></image>
+            <text>{{item.name}}</text>
+          </view>
         </view>
       </view>
+    </view>
 
-      <!-- 个性需求输入区域 -->
-      <view class="form-title sub">请填写您对旅游景点的个性需求(选填)</view>
-      <view class="requirement-section">
-        <view class="form-item">
-          <text class="required">*</text>
-          <text>自然景观：</text>
-          <input type="text" placeholder="如草原/海滩/雪山" v-value="formData.naturalLandscape" />
-        </view>
-
-        <view class="form-item">
-          <text class="required">*</text>
-          <text>社会景观：</text>
-          <input type="text" placeholder="如纪念馆/博物馆/科技馆" v-value="formData.socialLandscape" />
-        </view>
-
-        <view class="form-item">
-          <text class="required">*</text>
-          <text>周边饮食：</text>
-          <input type="text" placeholder="如闽菜/川菜/粤菜" v-value="formData.cuisine" />
-        </view>
-
-        <view class="form-item">
-          <text class="required">*</text>
-          <text>其余需求：</text>
-          <input type="text" placeholder="填写对景点的其余需求" v-value="formData.otherNeeds" />
-        </view>
+    <!-- 底部按钮 -->
+    <view class="bottom-buttons">
+      <view class="btn" @click="toCustomerService">
+        <image src="/static/icons/customer-service.png" mode="widthFix"></image>
+        <text>客服服务</text>
       </view>
-
-      <!-- 提交按钮 -->
-      <button class="submit-btn" @click="submitForm">
-        提交获得景点推荐
-        
-      </button>
+      <view class="btn" @click="toPhoneConsult">
+        <image src="/static/icons/phone.png" mode="widthFix"></image>
+        <text>电话咨询</text>
+      </view>
     </view>
   </view>
 </template>
 
-<script lang="ts">
-import { defineComponent, reactive } from 'vue'
-
-export default defineComponent({
-  setup() {
-    const formData = reactive({
-      destination: '',
-      startDate: '',
-      endDate: '',
-      budgetMin: '',
-      budgetMax: '',
-      accessibility: 'no',
-      kidFriendly: 'no',
-      petFriendly: 'no',
-      naturalLandscape: '',
-      socialLandscape: '',
-      cuisine: '',
-      otherNeeds: ''
-    })
-
-    const submitForm = () => {
-      // 这里可以添加表单验证逻辑
-      
-      // 跳转到推荐结果页面并传递数据
+<script>
+export default {
+  data() {
+    return {
+      recommendServices: [
+        { name: '航班助手', icon: '/static/icons/flight.png', path: '/pages/flight/flight' },
+        { name: '停运查询', icon: '/static/icons/suspension.png', path: '/pages/suspension/index' },
+        { name: '机票报销', icon: '/static/icons/reimburse.png', path: '/pages/reimburse/index' },
+        { name: '出行清单', icon: '/static/icons/checklist.png', path: '/pages/checklist/index' },
+        { name: '权益兑换', icon: '/static/icons/benefits.png', path: '/pages/benefits/index' },
+        { name: '紧急救援', icon: '/static/icons/emergency.png', path: '/pages/emergency/index' }
+      ],
+      hotServices: [
+        { name: '国内机票', icon: '/static/icons/domestic-flight.png', path: '/pages/domestic-flight/index' },
+        { name: '国内酒店', icon: '/static/icons/hotel.png', path: '/pages/hotel/index' },
+        { name: '民宿', icon: '/static/icons/homestay.png', path: '/pages/homestay/index' },
+        { name: '会员中心', icon: '/static/icons/member.png', path: '/pages/member/index' }
+      ]
+    }
+  },
+  methods: {
+    goBack() {
+      uni.navigateBack()
+    },
+    handleServiceClick(item) {
       uni.navigateTo({
-        url: '/pages/tuijianjieguo/tuijianjieguo',
-        success: (res) => {
-          // 通过eventChannel向被打开页面传送数据
-          res.eventChannel.emit('acceptFormData', formData)
-        }
+        url: item.path
+      })
+    },
+    toCustomerService() {
+      uni.navigateTo({
+        url: '/pages/feedback/feedback'
+      })
+    },
+    toPhoneConsult() {
+      // 可以直接拨打电话或跳转到电话咨询页面
+      uni.makePhoneCall({
+        phoneNumber: '400-XXX-XXXX'
       })
     }
-
-    return {
-      formData,
-      submitForm
-    }
   }
-})
+}
 </script>
 
-<style scoped>
-.container {
-  padding: 20px;
+<style lang="scss" scoped>
+.customer-service {
+  min-height: 100vh;
   background-color: #f5f5f5;
-}
-
-.form-container {
-  background-color: #fff;
-  border-radius: 10px;
-  padding: 20px;
-}
-
-.form-title {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 20px;
-}
-
-.form-title.sub {
-  margin-top: 20px;
-}
-
-.form-item {
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-}
-
-.label {
-  width: 80px;
-  flex-shrink: 0;
-}
-
-input {
-  flex: 1;
-  border: 1px solid #ddd;
-  padding: 8px;
-  border-radius: 4px;
-}
-
-.date-picker {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.budget-input {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.separator {
-  color: #666;
-}
-
-.checkbox-group {
-  margin: 15px 0;
-}
-
-.checkbox-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-radio-group {
-  display: flex;
-  gap: 20px;
-}
-
-.required {
-  color: #ff4d4f;
-  margin-right: 5px;
-}
-
-.requirement-section {
-  margin-top: 15px;
-}
-
-.submit-btn {
-  margin-top: 10px;
-  width: 100%;
-  height:70px;
-  background-color: #007AFF;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 25px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   
+  .header {
+    background-color: #1890ff;
+    padding: 40rpx 20rpx;
+    display: flex;
+    align-items: center;
+    color: #fff;
+    
+    .back-icon {
+      width: 60rpx;
+      height: 60rpx;
+      display: flex;
+      align-items: center;
+      margin-right: 20rpx;
+      
+      .back-text {
+        font-size: 40rpx;
+        font-weight: bold;
+        color: #fff;
+      }
+    }
+    
+    .title {
+      font-size: 32rpx;
+      font-weight: 500;
+    }
+  }
+
+  .service-section {
+    background-color: #fff;
+    margin: 20rpx;
+    padding: 20rpx;
+    border-radius: 12rpx;
+    
+    .section-title {
+      font-size: 30rpx;
+      font-weight: bold;
+      margin-bottom: 30rpx;
+      padding-left: 20rpx;
+      border-left: 8rpx solid #1890ff;
+    }
+    
+    .service-grid {
+      .service-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30rpx;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .service-item {
+          flex: 1;
+          margin: 0 10rpx;
+
+          &:first-child {
+            margin-left: 0;
+          }
+
+          &:last-child {
+            margin-right: 0;
+          }
+        }
+      }
+      
+      .service-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20rpx;
+        
+        image {
+          width: 100rpx;
+          height: 100rpx;
+          margin-bottom: 16rpx;
+        }
+        
+        text {
+          font-size: 26rpx;
+          color: #333;
+          text-align: center;
+        }
+
+        &:active {
+          opacity: 0.7;
+        }
+      }
+    }
+  }
+
+  .bottom-buttons {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    background-color: #fff;
+    padding: 20rpx;
+    border-top: 1rpx solid #eee;
+    box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+    
+    .btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      
+      image {
+        width: 56rpx;
+        height: 56rpx;
+        margin-bottom: 10rpx;
+      }
+      
+      text {
+        font-size: 26rpx;
+        color: #333;
+      }
+
+      &:active {
+        opacity: 0.7;
+      }
+    }
+  }
 }
-
-
-</style> 
+</style>

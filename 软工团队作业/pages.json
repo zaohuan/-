@@ -1,23 +1,23 @@
 {
 	"pages": [
-		// {
-			// "path": "pages/welcome/welcome",
-			// "style": {
-			// 	"navigationBarTitleText": "欢迎"
-			// }
-			// },
-			// {
-			// "path": "pages/login/login",
-			// "style": {
-			// 	"navigationBarTitleText": "登录"
-			// }
-			// },
-			// {
-			// "path": "pages/register/register",
-			// "style": {
-			// 	"navigationBarTitleText": "注册"
-			// }
-		// },
+		{
+			"path": "pages/welcome/welcome",
+			"style": {
+				"navigationBarTitleText": "欢迎"
+			}
+			},
+			{
+			"path": "pages/login/login",
+			"style": {
+				"navigationBarTitleText": "登录"
+			}
+			},
+			{
+			"path": "pages/register/register",
+			"style": {
+				"navigationBarTitleText": "注册"
+			}
+		},
 		{
 			
 			"path": "pages/shouye/shouye",

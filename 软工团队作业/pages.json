@@ -35,7 +35,7 @@
 		{
 			"path": "pages/custom-route/custom-route",
 			"style": {
-				
+				"navigationBarTitleText": "个性化推荐"
 				
 			}
 		},

@@ -22,7 +22,8 @@
 			
 			"path": "pages/shouye/shouye",
 			"style": {
-				"navigationBarTitleText": "首页"
+				"navigationBarTitleText": "首页",
+				"navigationStyle": "custom"
 			}
 		},
 		{
@@ -34,7 +35,8 @@
 		{
 			"path": "pages/custom-route/custom-route",
 			"style": {
-				"navigationBarTitleText": ""
+				
+				
 			}
 		},
 		{

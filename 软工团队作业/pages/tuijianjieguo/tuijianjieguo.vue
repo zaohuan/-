@@ -49,52 +49,69 @@ export default defineComponent({
       })
     }
 
-    // 保留这个函数中的数据和逻辑
+    // 获取推荐路线
     const generateRecommendations = (formData: any) => {
-      // 这里可以根据表单数据处理逻辑
-      // 示例数据，实际应该根据formData来生成
-      recommendRoutes.value = [
-        {
-          title: '豪华尊享游',
-          spots: [
-            { name: '鼓山' },
-            { name: '三坊七巷' },
-            { name: '达明美食街' }
-          ],
-          budget: '1460-2780'
-        },
-        {
-          title: '经济适用游',
-          spots: [
-            { name: '鼓山' },
-            { name: '闽江公园' },
-            { name: '万达广场/老街' }
-          ],
-          budget: '860-1280'
-        },
-        {
-          title: '特种兵穷游',
-          spots: [
-            { name: '青云山' },
-            { name: '鼓山' },
-            { name: '达明美食街' }
-          ],
-          budget: '310-580'
+          // 获取accessToken
+          uniCloud.callFunction({
+            name: 'getAccessToken',  // 调用获取accessToken的云函数
+            success: (tokenRes) => {
+              const accessToken = tokenRes.result.data.access_token;
+              if (!accessToken) {
+                uni.showToast({
+                  title: '获取AccessToken失败',
+                  icon: 'none'
+                });
+                return;
+              }
+    
+              // 调用 getTuiJianJieGuo 云函数生成推荐路线
+              uniCloud.callFunction({
+                name: 'getTuiJianJieGuo',
+                data: {
+                  accessToken: accessToken,
+                  formData: formData,  // 传递用户的表单数据
+                  modelurl: 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions_pro'  // 替换为实际的API URL
+                },
+                success: (res) => {
+                  if (res.result) {
+                    recommendRoutes.value = res.result.data.routes || [];
+                  } else {
+                    uni.showToast({
+                      title: '未能获取有效的推荐数据',
+                      icon: 'none'
+                    });
+                  }
+                },
+                fail: (err) => {
+                  uni.showToast({
+                    title: '请求失败，请稍后再试',
+                    icon: 'none'
+                  });
+                }
+              });
+            },
+            fail: (err) => {
+              uni.showToast({
+                title: '获取AccessToken失败',
+                icon: 'none'
+              });
+            }
+          });
         }
-      ]
-    }
 
     onMounted(() => {
       // 获取当前页面栈
       const pages = getCurrentPages()
+	  
       // 获取当前页面对象
       const currentPage = pages[pages.length - 1]
+
       // 获取事件通道
       const eventChannel = currentPage.getOpenerEventChannel()
       
       // 监听acceptFormData事件
       eventChannel.on('acceptFormData', (data) => {
-        console.log('接收到的表单数据：', data)
+        console.log('接收到的表单数据：', JSON.stringify(data))
         generateRecommendations(data)
       })
     })

@@ -111,6 +111,7 @@ export default defineComponent({
 				data: {
 					accessToken: this.wenxinConfig.accessToken, // 替换为实际 Access Token
 					params: params,
+					modelurl: 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/ernie-speed-128k'
 				},
 				success: (res) => {
 					if (res.result) {

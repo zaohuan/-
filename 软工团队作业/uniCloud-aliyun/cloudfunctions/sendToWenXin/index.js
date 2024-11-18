@@ -9,8 +9,9 @@ const https = require('https');
 exports.main = async (event, context) => {
     const params = event.params;
     const accessToken = event.accessToken;
+	const modelurl = event.modelurl;
 	console.log('access_token in sendtowenxin fun(): ', accessToken);
-    const url = `https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/ernie-speed-pro-128k?access_token=${accessToken}`;
+    const url = modelurl + `?access_token=${accessToken}`;
 
     return new Promise((resolve, reject) => {
         const requestData = JSON.stringify(params);

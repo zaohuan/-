@@ -131,9 +131,9 @@ export default defineComponent({
 			});
 		},
 		async sendMessage() {
-			//该方法用于处理用户消息的发送
 			if (!this.messageInput.trim()) return;
 			
+			// 添加用户消息
 			const userMessage: ChatMessage = {
 				type: 'sent',
 				content: this.messageInput,
@@ -142,13 +142,16 @@ export default defineComponent({
 			};
 			this.chatMessages.push(userMessage);
 			
+			// 更新聊天历史
 			this.sessionInfo.chatHistory.push({
 				role: 'user',
 				content: this.messageInput
 			});
 			
+			const currentMessage = this.messageInput;
 			this.messageInput = '';
 			
+			// 显示加载消息
 			const loadingMessage: ChatMessage = {
 				type: 'received',
 				content: '正在思考中...',
@@ -157,24 +160,67 @@ export default defineComponent({
 			};
 			this.chatMessages.push(loadingMessage);
 			
-			const aiResponse = await this.sendToWenxin(userMessage.content);
-			
-			this.sessionInfo.chatHistory.push({
-				role: 'assistant',
-				content: aiResponse.result
-			});
-			
-			this.chatMessages.pop();
-			const aiResponseMessage: ChatMessage = {
-				type: 'received',
-				content: aiResponse.result,
-				timestamp: Date.now(),
-				messageId: Math.random().toString(36).substring(2)
-			};
-			this.chatMessages.push(aiResponseMessage);
-			
-			if (this.sessionInfo.chatHistory.length > this.wenxinConfig.maxHistoryLength) {
-				this.sessionInfo.chatHistory = this.sessionInfo.chatHistory.slice(-this.wenxinConfig.maxHistoryLength);
+			try {
+				// 调用文心一言API
+				const response = await uniCloud.callFunction({
+					name: 'sendToWenXin',
+					data: {
+						accessToken: this.wenxinConfig.accessToken,
+						params: {
+							messages: [
+								{
+									role: 'user',
+									content: currentMessage
+								},
+								...this.sessionInfo.chatHistory
+							],
+							temperature: this.wenxinConfig.temperature,
+							top_p: this.wenxinConfig.top_p,
+							user_id: this.sessionInfo.userId,
+						}
+					}
+				});
+				
+				// 移除加载消息
+				this.chatMessages.pop();
+				
+				if (response.result && response.result.data && response.result.data.result) {
+					// 添加AI回复消息
+					const aiResponseMessage: ChatMessage = {
+						type: 'received',
+						content: response.result.data.result,
+						timestamp: Date.now(),
+						messageId: Math.random().toString(36).substring(2)
+					};
+					this.chatMessages.push(aiResponseMessage);
+					
+					// 更新聊天历史
+					this.sessionInfo.chatHistory.push({
+						role: 'assistant',
+						content: response.result.data.result
+					});
+					
+					// 控制历史记录长度
+					if (this.sessionInfo.chatHistory.length > this.wenxinConfig.maxHistoryLength) {
+						this.sessionInfo.chatHistory = this.sessionInfo.chatHistory.slice(-this.wenxinConfig.maxHistoryLength);
+					}
+				} else {
+					throw new Error('API返回数据格式错误');
+				}
+			} catch (error) {
+				// 移除加载消息
+				this.chatMessages.pop();
+				
+				// 显示错误消息
+				const errorMessage: ChatMessage = {
+					type: 'received',
+					content: '抱歉，我遇到了一些问题，请稍后再试。',
+					timestamp: Date.now(),
+					messageId: Math.random().toString(36).substring(2)
+				};
+				this.chatMessages.push(errorMessage);
+				
+				console.error('发送消息失败:', error);
 			}
 		},
 		toggleRating() {
@@ -225,8 +271,24 @@ export default defineComponent({
 		}
 	},
 	created() {
-		//在组件创建时调用 getAccessToken() 方法，获取并设置 access_token
+		// 获取access token
 		this.getAccessToken();
+		
+		// 添加欢迎消息
+		this.chatMessages.push({
+			type: 'received',
+			content: '您好！我是AI客服助手，很高兴为您服务。请问有什么可以帮您？',
+			timestamp: Date.now(),
+			messageId: Math.random().toString(36).substring(2)
+		});
+
+		// 使用setTimeout确保access token已获取
+		setTimeout(async () => {
+			// 自动发送用户消息
+			const autoMessage = "我现在在旅游过程当中遇到一些问题，你能为我解答吗？";
+			this.messageInput = autoMessage;
+			await this.sendMessage();
+		}, 1000); // 延迟1秒执行，确保access token已获取
 	}
 })
 function wenxinApiCall(_params: WenxinRequestParams): WenxinResponse | PromiseLike<WenxinResponse> {

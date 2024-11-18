@@ -95,22 +95,40 @@ export default defineComponent({
 			const params: WenxinRequestParams = {
 				messages: [
 					{
-						role: 'system',
-						content: this.wenxinConfig.systemPrompt
-					},
-					...this.sessionInfo.chatHistory,
-					{
 						role: 'user',
 						content: userMessage
-					}
+					},
+					...this.sessionInfo.chatHistory
 				],
 				temperature: this.wenxinConfig.temperature,
 				top_p: this.wenxinConfig.top_p,
-				user_id: this.sessionInfo.userId
+				user_id: this.sessionInfo.userId,
 			}
 			
 			// 实际API调用部分需要在后端实现
-			return await wenxinApiCall(params)
+			return uniCloud.callFunction({
+				name: 'sendToWenXin', // 云函数名称
+				data: {
+					accessToken: this.wenxinConfig.accessToken, // 替换为实际 Access Token
+					params: params,
+				},
+				success: (res) => {
+					if (res.result) {
+						console.log('云函数返回:', res.result);
+
+						if (res.result.data && res.result.data.result) {
+							console.log('文心一言返回数据:', res.result.data.result);
+						} else {
+							console.error('文心一言响应结构不符合预期:', res.result.data);
+						}
+					} else {
+						console.error('云函数未返回预期结果:', res);
+					}
+				},
+				fail: (err) => {
+					console.error('云函数调用失败:', err);
+				},
+			});
 		},
 		async sendMessage() {
 			//该方法用于处理用户消息的发送
@@ -180,26 +198,30 @@ export default defineComponent({
 			})
 		},
 		async getAccessToken() {
-			try {
-				const response = await uni.request({
-					url: 'YOUR_BACKEND_API/get-wenxin-token',
-					method: 'GET'
+		    try {
+				uniCloud.callFunction({
+				    name: 'getAccessToken', // 云函数的名称
+				    data: {}, // 如果需要传参，则在此传递
+				    success: (res) => {
+				        if (res.result && res.result.data.access_token) {
+				            console.log('Access Token:', res.result.data.access_token);
+				            // 处理 access_token，例如保存到前端变量中
+							this.wenxinConfig.accessToken = res.result.data.access_token;
+				        } else {
+				            console.error('获取 Access Token 失败:', res.result.error);
+				        }
+				    },
+				    fail: (err) => {
+				        console.error('云函数调用失败:', err);
+				    },
 				});
-				
-				// 使用类型断言来确保 response.data 的类型
-				const tokenResponse = response.data as AccessTokenResponse;
-				
-				if (tokenResponse && tokenResponse.access_token) {
-					this.wenxinConfig.accessToken = tokenResponse.access_token;
-					if (tokenResponse.expires_in) {
-						setTimeout(() => {
-							this.getAccessToken(); // token过期前自动刷新
-						}, (tokenResponse.expires_in - 60) * 1000); // 提前60秒刷新
-					}
-				}
-			} catch (error) {
-				console.error('获取access_token失败:', error);
-			}
+		    } catch (error) {
+		        console.error('请求失败:', error);
+		        uni.showToast({
+		            title: `请求失败: ${error}`,
+		            icon: 'none'
+		        });
+		    }
 		}
 	},
 	created() {

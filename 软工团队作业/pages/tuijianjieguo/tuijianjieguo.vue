@@ -1,8 +1,19 @@
 <!-- PTR-FR-002 -->
 <template>
   <view class="container">
+    <!-- 加载动画 -->
+    <view class="loading-container" v-if="isLoading">
+      <view class="loading-content">
+        <view class="loading-spinner"></view>
+        <view class="loading-text">正在努力为您生成个性化推荐，请耐心等待哦</view>
+        <view class="loading-progress-bar">
+          <view class="progress-inner" :style="{ width: progressWidth + '%' }"></view>
+        </view>
+      </view>
+    </view>
+
     <!-- 推荐路线列表 -->
-    <view class="route-list">
+    <view class="route-list" v-else>
       <view class="route-card" 
             v-for="(route, index) in recommendRoutes" 
             :key="index"
@@ -37,6 +48,29 @@ interface RouteItem {
 
 export default defineComponent({
   setup() {
+    const isLoading = ref(true)
+    const progressWidth = ref(0)
+    let progressTimer: any = null
+
+    // 模拟进度增加
+    const startProgress = () => {
+      progressWidth.value = 0
+      progressTimer = setInterval(() => {
+        if (progressWidth.value < 90) {
+          progressWidth.value += Math.random() * 15
+        }
+      }, 500)
+    }
+
+    // 完成加载
+    const completeProgress = () => {
+      progressWidth.value = 100
+      setTimeout(() => {
+        clearInterval(progressTimer)
+        isLoading.value = false
+      }, 500)
+    }
+
     // 初始化为空数组，实际数据会在 generateRecommendations 中设置
     const recommendRoutes = ref<RouteItem[]>([])
 
@@ -51,53 +85,59 @@ export default defineComponent({
 
     // 获取推荐路线
     const generateRecommendations = (formData: any) => {
-          // 获取accessToken
+      isLoading.value = true
+      startProgress()
+      
+      uniCloud.callFunction({
+        name: 'getAccessToken',
+        success: (tokenRes) => {
+          const accessToken = tokenRes.result.data.access_token;
+          if (!accessToken) {
+            uni.showToast({
+              title: '获取AccessToken失败',
+              icon: 'none'
+            });
+            return;
+          }
+    
+          // 调用 getTuiJianJieGuo 云函数生成推荐路线
           uniCloud.callFunction({
-            name: 'getAccessToken',  // 调用获取accessToken的云函数
-            success: (tokenRes) => {
-              const accessToken = tokenRes.result.data.access_token;
-              if (!accessToken) {
+            name: 'getTuiJianJieGuo',
+            data: {
+              accessToken: accessToken,
+              formData: formData,  // 传递用户的表单数据
+              modelurl: 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions_pro'  // 替换为实际的API URL
+            },
+            success: (res) => {
+              if (res.result) {
+                recommendRoutes.value = res.result.data.routes || [];
+                completeProgress()
+              } else {
+                completeProgress()
                 uni.showToast({
-                  title: '获取AccessToken失败',
+                  title: '未能获取有效的推荐数据',
                   icon: 'none'
                 });
-                return;
               }
-    
-              // 调用 getTuiJianJieGuo 云函数生成推荐路线
-              uniCloud.callFunction({
-                name: 'getTuiJianJieGuo',
-                data: {
-                  accessToken: accessToken,
-                  formData: formData,  // 传递用户的表单数据
-                  modelurl: 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions_pro'  // 替换为实际的API URL
-                },
-                success: (res) => {
-                  if (res.result) {
-                    recommendRoutes.value = res.result.data.routes || [];
-                  } else {
-                    uni.showToast({
-                      title: '未能获取有效的推荐数据',
-                      icon: 'none'
-                    });
-                  }
-                },
-                fail: (err) => {
-                  uni.showToast({
-                    title: '请求失败，请稍后再试',
-                    icon: 'none'
-                  });
-                }
-              });
             },
             fail: (err) => {
+              completeProgress()
               uni.showToast({
-                title: '获取AccessToken失败',
+                title: '请求失败，请稍后再试',
                 icon: 'none'
               });
             }
           });
+        },
+        fail: (err) => {
+          completeProgress()
+          uni.showToast({
+            title: '获取AccessToken失败',
+            icon: 'none'
+          });
         }
+      })
+    }
 
     onMounted(() => {
       // 获取当前页面栈
@@ -117,6 +157,8 @@ export default defineComponent({
     })
 
     return {
+      isLoading,
+      progressWidth,
       recommendRoutes,
       navigateToDetail
     }
@@ -158,5 +200,58 @@ export default defineComponent({
 .route-budget {
   font-size: 14px;
   color: #666;
+}
+
+.loading-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.loading-content {
+  width: 80%;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 20px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #ff6b6b;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.loading-progress-bar {
+  width: 100%;
+  height: 4px;
+  background-color: #f3f3f3;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-inner {
+  height: 100%;
+  background-color: #ff6b6b;
+  transition: width 0.3s ease-in-out;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style> 

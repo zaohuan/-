@@ -22,19 +22,31 @@
       <view class="form-item">
         <text class="label">时间：</text>
         <view class="date-picker">
-          <input 
-            type="text" 
-            placeholder="如2024/10/25" 
-            :value="formData.startDate"
-            @input="e => formData.startDate = e.detail.value"
-          />
+          <picker 
+            mode="date" 
+            :value="formData.startDate" 
+            start="2024-01-01" 
+            end="2025-12-31" 
+            @change="onStartDateChange"
+          >
+            <view class="picker-item">
+              <text>{{ formData.startDate || '请选择开始日期' }}</text>
+              <text class="picker-arrow">▼</text>
+            </view>
+          </picker>
           <text class="separator">至</text>
-          <input 
-            type="text" 
-            placeholder="如2024/11/04" 
-            :value="formData.endDate"
-            @input="e => formData.endDate = e.detail.value"
-          />
+          <picker 
+            mode="date" 
+            :value="formData.endDate" 
+            :start="formData.startDate || '2024-01-01'" 
+            end="2025-12-31" 
+            @change="onEndDateChange"
+          >
+            <view class="picker-item">
+              <text>{{ formData.endDate || '请选择结束日期' }}</text>
+              <text class="picker-arrow">▼</text>
+            </view>
+          </picker>
         </view>
       </view>
 
@@ -219,9 +231,19 @@ export default defineComponent({
       }
     };
 	
+    const onStartDateChange = (e: any) => {
+      formData.startDate = e.detail.value;
+    }
+
+    const onEndDateChange = (e: any) => {
+      formData.endDate = e.detail.value;
+    }
+
     return {
       formData,
-      submitForm
+      submitForm,
+      onStartDateChange,
+      onEndDateChange
     }
   }
 })
@@ -271,16 +293,22 @@ input {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 1;
+}
+
+.date-picker picker {
+  flex: 1;
+}
+
+.separator {
+  color: #666;
+  padding: 0 5px;
 }
 
 .budget-input {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-.separator {
-  color: #666;
 }
 
 .checkbox-group {
@@ -322,5 +350,21 @@ radio-group {
   
 }
 
+.picker-item {
+  flex: 1;
+  border: 1px solid #ddd;
+  padding: 8px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+}
+
+.picker-arrow {
+  font-size: 12px;
+  color: #666;
+  margin-left: 5px;
+}
 
 </style> 

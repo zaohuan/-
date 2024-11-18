@@ -178,7 +178,8 @@ export default defineComponent({
 							temperature: this.wenxinConfig.temperature,
 							top_p: this.wenxinConfig.top_p,
 							user_id: this.sessionInfo.userId,
-						}
+						},
+						modelurl:'https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/ernie-speed-128k'
 					}
 				});
 				

@@ -31,7 +31,7 @@
       <!-- 时间轴行程安排 -->
       <scroll-view scroll-y class="schedule-list">
         <view class="schedule-item" v-for="(item, index) in currentSchedule" :key="index">
-          <view class="time">{{ item.time }}</view>
+          <view class="time">{{ item.time }} </view>
           <view class="schedule-content">
             <view class="spot-name">{{ item.spot }}</view>
             <view class="transport" v-if="item.transport">
@@ -73,7 +73,7 @@ export default defineComponent({
   setup() {
     const routeData = ref<any>({})
     const currentDay = ref(1)
-    const totalDays = ref(1)
+    const totalDays = ref(2)
     const mapData = ref<MapData>({
       latitude: 26.0829,  // 福州市中心坐标
       longitude: 119.2978,
@@ -91,6 +91,8 @@ export default defineComponent({
 
     // 切换日期
     const switchDay = (day: number) => {
+      console.log('切换到第', day, '天')
+      console.log('当前行程数据：', scheduleData.value[day - 1])
       currentDay.value = day
       updateMapRoute(day)
     }
@@ -157,6 +159,10 @@ export default defineComponent({
         console.log('接收到路线数据：', data)
         routeData.value = data
         
+        // 打印确认数据
+        console.log('行程数据：', scheduleData.value)
+        console.log('总天数：', totalDays.value)
+        
         // 处理行程数据
         // 这里应该根据实际数据结构来处理
         scheduleData.value = [[
@@ -180,7 +186,30 @@ export default defineComponent({
             latitude: 26.0801,
             longitude: 119.2967
           }
-        ]]
+        ],
+		[
+		  {
+		    time: '7:30',
+		    spot: '酒店',
+		    transport: '打车24分钟',
+		    latitude: 26.0829,
+		    longitude: 119.2978
+		  },
+		  {
+		    time: '8:00',
+		    spot: '鼓山',
+		    transport: '打车24分钟',
+		    latitude: 26.0854,
+		    longitude: 119.3631
+		  },
+		  {
+		    time: '12:00',
+		    spot: '餐厅',
+		    latitude: 26.0801,
+		    longitude: 119.2967
+		  }
+		]
+		]
         
         totalDays.value = scheduleData.value.length
         updateMapRoute(1)

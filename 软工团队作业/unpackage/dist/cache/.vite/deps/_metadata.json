@@ -1,0 +1,15 @@
+{
+  "hash": "3ad93820",
+  "configHash": "48e8945f",
+  "lockfileHash": "e3b0c442",
+  "browserHash": "c392f109",
+  "optimized": {
+    "@amap/amap-jsapi-loader": {
+      "src": "../../../../../pages/route-detail/node_modules/@amap/amap-jsapi-loader/dist/index.js",
+      "file": "@amap_amap-jsapi-loader.js",
+      "fileHash": "1556e2a6",
+      "needsInterop": true
+    }
+  },
+  "chunks": {}
+}

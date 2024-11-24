@@ -1,18 +1,7 @@
 <template>
   <view class="container">
     <!-- 地图区域 -->
-    <view class="map-container">
-      <map
-        id="routeMap"
-        class="map"
-        :latitude="mapData.latitude"
-        :longitude="mapData.longitude"
-        :markers="mapData.markers"
-        :polyline="mapData.polyline"
-        :scale="14"
-        show-location
-      ></map>
-    </view>
+    <view class="map-container" id="routeMap"></view>
 
     <!-- 行程信息区域 -->
     <view class="schedule-container">
@@ -53,8 +42,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted, computed } from 'vue';
-import AMapLoader from '@amap/amap-jsapi-loader';
-
+import mapRender from './Amap.js'
 
 interface ScheduleItem {
   time: string
@@ -82,6 +70,7 @@ export default defineComponent({
       markers: [],
       polyline: []
     })
+    const map = ref<any>(null);
 
     // 当前日程安排
     const currentSchedule = computed(() => {
@@ -96,23 +85,56 @@ export default defineComponent({
       console.log('切换到第', day, '天')
       console.log('当前行程数据：', scheduleData.value[day - 1])
       currentDay.value = day
-      updateMapRoute(day)
+      mapRender.methods.initMap('routeMap', scheduleData.value, currentDay.value);
+	  //updateMapRoute(day)
     }
 
-    // 更新地图路线
-    const updateMapRoute = async (day: number) => {
-      const daySchedule = scheduleData.value[day - 1];
-      if (!daySchedule || daySchedule.length < 2) return;
-	  // 使用uniapp自带的高德地图API
-	        const mapContext = uni.createMapContext('routeMap', this)
-	        const origin = `${daySchedule[0].latitude},${daySchedule[0].longitude}`
-	        const destination = `${daySchedule[daySchedule.length - 1].latitude},${daySchedule[daySchedule.length - 1].longitude}`
-	        const waypoints = daySchedule
-	          .slice(1, -1)
-	          .map(item => `${item.latitude},${item.longitude}`)
-	          .join(';')
-      
-    };
+  //   // 更新地图路线
+  //   const updateMapRoute = async (day: number) => {
+  //     console.log("更新地图");
+  //     const daySchedule = scheduleData.value[day - 1];
+  //     if (!daySchedule || daySchedule.length < 2)
+	 //  {
+		//   console.log("invalid scheduledata!!");
+	 //  }
+
+  //     const origin = new AMap.LngLat(daySchedule[0].longitude, daySchedule[0].latitude);
+  //     const destination = new AMap.LngLat(daySchedule[daySchedule.length - 1].longitude, daySchedule[daySchedule.length - 1].latitude);
+  //     const waypoints = daySchedule.slice(1, -1).map(item => new AMap.LngLat(item.longitude, item.latitude));
+
+  //     console.log("Origin:", origin);
+  //     console.log("Destination:", destination);
+  //     console.log("Waypoints:", waypoints);
+
+  //     AMap.plugin("AMap.Driving", function () {
+		//   console.log("AMap.Driving Loaded")
+  //       var driving = new AMap.Driving({
+		//   map: map.value,
+  //         policy: 0, // 驾车路线规划策略，0是速度优先的策略
+		//   //panel:"panel"
+  //       });
+		// console.log("driving调用");
+
+  //       driving.search(
+  //          origin,destination,
+  //         (status, result) => {
+  //           console.log("Driving search status:", status);
+  //           if (status === 'complete') {
+  //             console.log('绘制驾车路线完成');
+  //             const path = result.routes[0].steps.flatMap(step => step.path);
+  //             const polyline = new AMap.Polyline({
+  //               path,
+  //               strokeColor: "#3366FF",
+  //               strokeWeight: 5,
+  //             });
+  //             map.value.add(polyline);
+  //           } else {
+  //             console.error('获取驾车数据失败：' + result);
+  //           }
+  //         }
+  //       );
+  //     });
+  //   };
 
     // 添加到我的行程
     const addToTrip = () => {
@@ -130,68 +152,112 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      const pages = getCurrentPages()
-      const currentPage = pages[pages.length - 1]
-      const eventChannel = currentPage.getOpenerEventChannel()
+		// window._AMapSecurityConfig = {
+		//     securityJsCode: "5ee8a6eb6e5eb6313947acf3e6ae18eb",
+		//   };
+  //     AMapLoader.load({
+  //       key: 'fc3c6e846fefdab859fd1ebf42729dac', // 替换为你的高德地图API密钥
+  //       version: '2.0',
+  //       plugins: ['AMap.Driving']
+  //     }).then((AMap) => {
+		//   console.log("地图生成");
+  //       map.value = new AMap.Map('routeMap', {
+  //         center: [mapData.value.longitude, mapData.value.latitude],
+  //         zoom: 14
+  //       });
+		
+        const pages = getCurrentPages()
+        const currentPage = pages[pages.length - 1]
+        const eventChannel = currentPage.getOpenerEventChannel()
+        
+        eventChannel.on('acceptRouteData', (data) => {
+          console.log('接收到路线数据：', JSON.stringify(data))
+          routeData.value = data
+          
+          // 打印确认数据
+          console.log('行程数据：', scheduleData.value)
+          console.log('总天数：', totalDays.value)
+          
+          // 处理行程数据
+		  // uniCloud.callFunction({
+		  //   name: 'getAccessToken',
+		  //   success: (tokenRes) => {
+		  //     const accessToken = tokenRes.result.data.access_token;
+		  //     if (!accessToken) {
+		  //       uni.showToast({
+		  //         title: '获取AccessToken失败',
+		  //         icon: 'none'
+		  //       });
+		  //       return;
+		  //     }
+		      
+		  //     // // 调用 getTuiJianJieGuo 云函数生成推荐路线
+		  //     // uniCloud.callFunction({
+		  //     //   name: 'getRouteDetail',
+		  //     //   data: {
+		  //     //     accessToken: accessToken,
+		  //     //     routeData: routeData.value,  // 传递用户的表单数据
+		  //     //     modelurl: 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/ernie-4.0-turbo-8k'  // 替换为实际的API URL
+		  //     //   },
+		  //     //   success: (res) => {
+		  //     //     if (res.result) {
+		  //     //       scheduleData.value = res.result.data.plan || [];
+			// 	  //   console.log("scheduledata数据： ", scheduleData);
+		  //     //     } else {
+		  //     //       uni.showToast({
+		  //     //         title: '未能获取有效的推荐数据',
+		  //     //         icon: 'none'
+		  //     //       });
+		  //     //     }
+		  //     //   },
+		  //     //   fail: (err) => {
+		  //     //     uni.showToast({
+		  //     //       title: '请求失败，请稍后再试',
+		  //     //       icon: 'none'
+		  //     //     });
+		  //     //   }
+		  //     // });
+		  //   },
+		  //   fail: (err) => {
+		  //     uni.showToast({
+		  //       title: '获取AccessToken失败',
+		  //       icon: 'none'
+		  //     });
+		  //   }
+		  // })
+          
+          totalDays.value = scheduleData.value.length
+        });
       
-      eventChannel.on('acceptRouteData', (data) => {
-        console.log('接收到路线数据：', JSON.stringify(data))
-        routeData.value = data
-        
-        // 打印确认数据
-        console.log('行程数据：', scheduleData.value)
-        console.log('总天数：', totalDays.value)
-        
-        // 处理行程数据
-		uniCloud.callFunction({
-		  name: 'getAccessToken',
-		  success: (tokenRes) => {
-		    const accessToken = tokenRes.result.data.access_token;
-		    if (!accessToken) {
-		      uni.showToast({
-		        title: '获取AccessToken失败',
-		        icon: 'none'
-		      });
-		      return;
-		    }
-		    
-		    // 调用 getTuiJianJieGuo 云函数生成推荐路线
-		    uniCloud.callFunction({
-		      name: 'getRouteDetail',
-		      data: {
-		        accessToken: accessToken,
-		        routeData: routeData.value,  // 传递用户的表单数据
-		        modelurl: 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/ernie-4.0-turbo-8k'  // 替换为实际的API URL
-		      },
-		      success: (res) => {
-		        if (res.result) {
-		          scheduleData.value = res.result.data.plan || [];
-				  console.log("scheduledata数据： ", scheduleData);
-		        } else {
-		          uni.showToast({
-		            title: '未能获取有效的推荐数据',
-		            icon: 'none'
-		          });
-		        }
-		      },
-		      fail: (err) => {
-		        uni.showToast({
-		          title: '请求失败，请稍后再试',
-		          icon: 'none'
-		        });
-		      }
-		    });
-		  },
-		  fail: (err) => {
-		    uni.showToast({
-		      title: '获取AccessToken失败',
-		      icon: 'none'
-		    });
-		  }
-		})
-        totalDays.value = scheduleData.value.length
-        updateMapRoute(1)
-      })
+	  
+	  scheduleData.value = [
+	    [
+	      {
+	        time: '7:30',
+	        spot: '酒店',
+	        transport: '打车24分钟',
+	        latitude: 26.0829,
+	        longitude: 119.2978
+	      },
+	      {
+	        time: '8:00',
+	        spot: '鼓山',
+	        transport: '打车24分钟',
+	        latitude: 26.0854,
+	        longitude: 119.3631
+	      },
+	      {
+	        time: '12:00',
+	        spot: '餐厅',
+	        latitude: 26.0801,
+	        longitude: 119.2967
+	      }
+	    ],
+	    [
+	      // 第2天的行程安排
+	    ]
+	  ]
+	  mapRender.methods.initMap('routeMap', scheduleData.value, currentDay.value);
     })
 
     return {
@@ -216,11 +282,8 @@ export default defineComponent({
 
 .map-container {
   height: 50vh;
-}
-
-.map {
   width: 100%;
-  height: 100%;
+  position: relative;
 }
 
 .schedule-container {
@@ -309,4 +372,4 @@ export default defineComponent({
   border-radius: 25px;
   font-size: 14px;
 }
-</style> 
+</style>

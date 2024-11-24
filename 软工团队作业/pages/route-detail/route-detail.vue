@@ -52,7 +52,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed } from 'vue'
+import { defineComponent, ref, onMounted, computed } from 'vue';
+import AMapLoader from '@amap/amap-jsapi-loader';
+
 
 interface ScheduleItem {
   time: string
@@ -86,7 +88,7 @@ export default defineComponent({
       // 根据当前选中的天数返回对应的行程安排
       return scheduleData.value[currentDay.value - 1] || []
     })
-
+	
     const scheduleData = ref<ScheduleItem[][]>([])
 
     // 切换日期
@@ -98,42 +100,19 @@ export default defineComponent({
     }
 
     // 更新地图路线
-    const updateMapRoute = (day: number) => {
-      const daySchedule = scheduleData.value[day - 1]
-      if (!daySchedule) return
-
-      // 更新地图标记点
-      const markers = daySchedule.map((item, index) => ({
-        id: index,
-        latitude: item.latitude,
-        longitude: item.longitude,
-        title: item.spot,
-        iconPath: '/static/icons/marker.png',
-        width: 30,
-        height: 30,
-        label: {
-          content: `${index + 1}. ${item.spot}`,
-          color: '#007AFF',
-          fontSize: 12,
-          anchorX: 0,
-          anchorY: -50
-        }
-      }))
-
-      // 更新路线
-      const points = daySchedule.map(item => ({
-        latitude: item.latitude,
-        longitude: item.longitude
-      }))
-
-      mapData.value.markers = markers
-      mapData.value.polyline = [{
-        points,
-        color: '#007AFF',
-        width: 4,
-        arrowLine: true
-      }]
-    }
+    const updateMapRoute = async (day: number) => {
+      const daySchedule = scheduleData.value[day - 1];
+      if (!daySchedule || daySchedule.length < 2) return;
+	  // 使用uniapp自带的高德地图API
+	        const mapContext = uni.createMapContext('routeMap', this)
+	        const origin = `${daySchedule[0].latitude},${daySchedule[0].longitude}`
+	        const destination = `${daySchedule[daySchedule.length - 1].latitude},${daySchedule[daySchedule.length - 1].longitude}`
+	        const waypoints = daySchedule
+	          .slice(1, -1)
+	          .map(item => `${item.latitude},${item.longitude}`)
+	          .join(';')
+      
+    };
 
     // 添加到我的行程
     const addToTrip = () => {
@@ -156,7 +135,7 @@ export default defineComponent({
       const eventChannel = currentPage.getOpenerEventChannel()
       
       eventChannel.on('acceptRouteData', (data) => {
-        console.log('接收到路线数据：', data)
+        console.log('接收到路线数据：', JSON.stringify(data))
         routeData.value = data
         
         // 打印确认数据
@@ -164,53 +143,52 @@ export default defineComponent({
         console.log('总天数：', totalDays.value)
         
         // 处理行程数据
-        // 这里应该根据实际数据结构来处理
-        scheduleData.value = [[
-          {
-            time: '7:30',
-            spot: '酒店',
-            transport: '打车24分钟',
-            latitude: 26.0829,
-            longitude: 119.2978
-          },
-          {
-            time: '8:00',
-            spot: '鼓山',
-            transport: '打车24分钟',
-            latitude: 26.0854,
-            longitude: 119.3631
-          },
-          {
-            time: '12:00',
-            spot: '餐厅',
-            latitude: 26.0801,
-            longitude: 119.2967
-          }
-        ],
-		[
-		  {
-		    time: '7:30',
-		    spot: '酒店',
-		    transport: '打车24分钟',
-		    latitude: 26.0829,
-		    longitude: 119.2978
+		uniCloud.callFunction({
+		  name: 'getAccessToken',
+		  success: (tokenRes) => {
+		    const accessToken = tokenRes.result.data.access_token;
+		    if (!accessToken) {
+		      uni.showToast({
+		        title: '获取AccessToken失败',
+		        icon: 'none'
+		      });
+		      return;
+		    }
+		    
+		    // 调用 getTuiJianJieGuo 云函数生成推荐路线
+		    uniCloud.callFunction({
+		      name: 'getRouteDetail',
+		      data: {
+		        accessToken: accessToken,
+		        routeData: routeData.value,  // 传递用户的表单数据
+		        modelurl: 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/ernie-4.0-turbo-8k'  // 替换为实际的API URL
+		      },
+		      success: (res) => {
+		        if (res.result) {
+		          scheduleData.value = res.result.data.plan || [];
+				  console.log("scheduledata数据： ", scheduleData);
+		        } else {
+		          uni.showToast({
+		            title: '未能获取有效的推荐数据',
+		            icon: 'none'
+		          });
+		        }
+		      },
+		      fail: (err) => {
+		        uni.showToast({
+		          title: '请求失败，请稍后再试',
+		          icon: 'none'
+		        });
+		      }
+		    });
 		  },
-		  {
-		    time: '8:00',
-		    spot: '鼓山',
-		    transport: '打车24分钟',
-		    latitude: 26.0854,
-		    longitude: 119.3631
-		  },
-		  {
-		    time: '12:00',
-		    spot: '餐厅',
-		    latitude: 26.0801,
-		    longitude: 119.2967
+		  fail: (err) => {
+		    uni.showToast({
+		      title: '获取AccessToken失败',
+		      icon: 'none'
+		    });
 		  }
-		]
-		]
-        
+		})
         totalDays.value = scheduleData.value.length
         updateMapRoute(1)
       })

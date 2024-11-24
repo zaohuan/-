@@ -17,7 +17,9 @@
             "delay" : 0
         },
         /* 模块配置 */
-        "modules" : {},
+        "modules" : {
+            "Maps" : {}
+        },
         /* 应用发布信息 */
         "distribute" : {
             /* android打包配置 */
@@ -43,7 +45,15 @@
             /* ios打包配置 */
             "ios" : {},
             /* SDK配置 */
-            "sdkConfigs" : {}
+            "sdkConfigs" : {
+                "maps" : {
+                    "amap" : {
+                        "name" : "amap_15060060272CeLja2Qbz",
+                        "appkey_ios" : "217852b6a6a85bf877da2ddb8ade837e",
+                        "appkey_android" : "a8d2170e03e2d4627ee688ada11946c6"
+                    }
+                }
+            }
         }
     },
     /* 快应用特有相关 */
@@ -68,5 +78,16 @@
     "uniStatistics" : {
         "enable" : false
     },
-    "vueVersion" : "3"
+    "vueVersion" : "3",
+    "h5" : {
+        "sdkConfigs" : {
+            "maps" : {
+                "amap" : {
+                    "key" : "fc3c6e846fefdab859fd1ebf42729dac",
+                    "securityJsCode" : "5ee8a6eb6e5eb6313947acf3e6ae18eb",
+                    "serviceHost" : ""
+                }
+            }
+        }
+    }
 }

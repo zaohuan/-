@@ -38,43 +38,34 @@ exports.main = async (event, context) => {
     美食偏好: ${cuisine}
     其他需求: ${otherNeeds}
 
-    请根据以上需求为用户提供以下格式的三条推荐路线：
+    请根据以上需求为用户提供以下格式的两条推荐路线：
     1. 每条路线应包括：
        - 路线标题（如 "豪华尊享游"）
        - 包含的景点（如 "鼓山"、"三坊七巷"）
        - 预算范围（如 "1460-2780"）
     2. 确保每条路线的预算在用户提供的最低预算和最高预算之间。
     3. 景点应根据用户的需求（如自然景观、适合儿童等）进行筛选。
-    4. 如果没有明确需求，可提供一些常见的景点。
+	4. 景点的数量应根据出发日期和结束日期进行选择
+    5. 如果没有明确需求，可提供一些常见的景点。
+	6. spots中的每一个列表代表一天的行程，根据天数生成对应天数的行程
 
     输出示例格式：
     [
       {
         "title": "豪华尊享游",
         "spots": [
-          { "name": "鼓山" },
-          { "name": "三坊七巷" },
-          { "name": "达明美食街" }
+          [{ "name": "鼓山" },{"name":"达明美食街"}],
+          [{ "name": "三坊七巷" },{"name":"鼓山"}], 
         ],
         "budget": "1460-2780"
       },
       {
         "title": "经济适用游",
         "spots": [
-          { "name": "鼓山" },
-          { "name": "闽江公园" },
-          { "name": "万达广场/老街" }
+          [{ "name": "闽江公园" }, {"name": "烟台山公园"}],
+          [{ "name": "万达广场/老街" }], //day2
         ],
         "budget": "860-1280"
-      },
-      {
-        "title": "特种兵穷游",
-        "spots": [
-          { "name": "青云山" },
-          { "name": "鼓山" },
-          { "name": "达明美食街" }
-        ],
-        "budget": "310-580"
       }
     ]
   `;
@@ -132,14 +123,19 @@ exports.main = async (event, context) => {
 		    }
 		  
 		    // 判断解析后的数据是否有效
-		    if (Array.isArray(routesData) && routesData.length > 0) {
-		      const formattedRoutes = routesData.map(route => ({
-		        title: route.title || '未知路线',  // 确保有 title 字段
-		        spots: route.spots && Array.isArray(route.spots) 
-		          ? route.spots.map(spot => ({ name: spot.name || '未知景点' }))  // 确保每个景点有 name
-		          : [],  // 如果没有 spots 或者 spots 不是数组，返回空数组
-		        budget: route.budget || '未知预算'  // 确保有 budget 字段
-		      }));
+			if (Array.isArray(routesData) && routesData.length > 0) {
+			  const formattedRoutes = routesData.map(route => ({
+				title: route.title || '未知路线',  // 确保有 title 字段
+				spots: route.spots && Array.isArray(route.spots) 
+				  ? route.spots.map((daySpots, index) => ({
+					  day: index + 1,
+					  spots: daySpots.map(spot => ({
+						name: spot.name || '未知景点'  // 确保每个景点有 name
+					  }))
+					}))
+				  : [],  // 如果没有 spots 或者 spots 不是数组，返回空数组
+				budget: route.budget || '未知预算'  // 确保有 budget 字段
+			  }));
 		      
 		      // 返回格式化后的推荐数据
 		      resolve({

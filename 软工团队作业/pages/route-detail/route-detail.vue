@@ -190,9 +190,41 @@ export default defineComponent({
 
     // 添加到我的行程
     const addToTrip = () => {
-      uni.showToast({
-        title: '已添加到我的行程',
-        icon: 'success'
+      const userInfo = uni.getStorageSync('userInfo')
+      if (!userInfo) {
+        uni.showToast({
+          title: '用户未登录',
+          icon: 'none'
+        })
+        return;
+      }
+
+      uniCloud.callFunction({
+        name: 'addToTrip',
+        data: {
+          scheduleData: scheduleData.value,
+          userInfo : userInfo
+        },
+        success: (res) => {
+          if (res.result && res.result.success) {
+            uni.showToast({
+              title: '已添加到我的行程',
+              icon: 'success'
+            })
+          } else {
+            uni.showToast({
+              title: '添加行程失败',
+              icon: 'none'
+            })
+          }
+        },
+        fail: (err) => {
+          console.error('添加行程失败:', err)
+          uni.showToast({
+            title: '请求失败，请稍后再试',
+            icon: 'none'
+          })
+        }
       })
     }
 

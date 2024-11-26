@@ -112,6 +112,15 @@
 			<button class="action-btn" @click="handleRealtime">实时调整</button>
 			<button class="action-btn" @click="handlePrepare">未雨绸缪</button>
 		</view>
+		
+		<web-view 
+			class="weather-webview"
+			id="weather-webview"
+			:webview-styles="{ progress: true }"
+			src="/static/weather.html"
+			@message="handleWebViewMessage"
+			ref="weatherWebview"
+		></web-view>
 	</view>
 </template>
 
@@ -178,50 +187,68 @@ export default {
 
         // 根据坐标获取城市名
         async getCityNameByCoords(lat, lon) {
-            try {
-                const response = await uni.request({
-                    url: 'https://us1.locationiq.com/v1/reverse.php',
-                    method: 'GET',
-                    data: {
-                        key: this.apiConfig.locationIQKey,
-                        lat: lat,
-                        lon: lon,
-                        format: 'json'
-                    }
-                });
-
-                if (response.data && response.data.address) {
-                    this.weatherData.city = response.data.address.city || '未知城市';
-                }
-            } catch (error) {
-                console.error('获取城市名称失败:', error);
-                this.weatherData.city = '未知城市';
+            const pages = getCurrentPages();
+            const page = pages[pages.length - 1];
+            const currentWebview = page.$getAppWebview();	
+			console.log('page:' ,currentWebview);
+			console.log('children:', currentWebview.children());
+			
+            const webviewId = currentWebview.children()[0];
+			console.log(webviewId);
+            if (webviewId) {
+                 webviewId.evalJS(`
+                    window.postMessage({ action: 'getCityNameByCoords', data: { lat: ${lat}, lon: ${lon} } }, '*');
+                `);
+				console.log('getCityNameBycorrds success by webview');
+				console.log('CityNameResult:', this.weatherData.city);
             }
+			else{
+				console.log('webview get error!',webviewId);
+			}
         },
 
         // 根据城市名获取坐标
         async getCityCoordinates(cityName) {
-            try {
-                const response = await uni.request({
-                    url: 'https://us1.locationiq.com/v1/search.php',
-                    method: 'GET',
-                    data: {
-                        key: this.apiConfig.locationIQKey,
-                        q: cityName,
-                        format: 'json'
-                    }
-                });
-                
-                if (response.data && response.data[0]) {
-                    this.location.lat = response.data[0].lat;
-                    this.location.lon = response.data[0].lon;
-                    return true;
-                }
-                return false;
-            } catch (error) {
-                console.error('获取城市坐标失败:', error);
-                return false;
+            const pages = getCurrentPages();
+            const page = pages[pages.length - 1];
+            const currentWebview = page.$getAppWebview();
+            const webviewId = currentWebview.children()[0];
+			
+			
+			console.log('currentWebview: ',currentWebview);
+			console.log('webviewID: ', webviewId);
+			console.log('cityname:', cityName);
+            if (webviewId) {
+                webviewId.evalJS(`
+                    window.postMessage({ action: 'getCityCoordinates', data: { cityName: '${cityName}' } }, '*');
+                `);
+				console.log('getCityCoords success by webview');
             }
+			else{
+				console.log('webview get error!');
+			}
+        },
+
+        handleWebViewMessage(event) {
+            const { action, city, lat, lon } = event.detail.data[0];
+            if (action === 'getCityNameByCoordsResult') {
+                this.weatherData.city = city;
+				console.log('handleWebViewMessage getCityNameByCoordsResult', this.weatherData.city);
+            } else if (action === 'getCityCoordinatesResult') {
+                this.location.lat = lat;
+                this.location.lon = lon;
+                if (lat && lon) {
+                    this.getWeatherByCoords();
+                } else {
+                    uni.showToast({
+                        title: '获取城市坐标失败',
+                        icon: 'none'
+                    });
+                }
+            }
+			else{
+				console.log('handleWebViewMessage Error', action);
+			}
         },
 
 // 需求编号:WT-FR-002  ,系统应自动从天气API获取实时天气数据。
@@ -306,13 +333,14 @@ export default {
             });
 
             try {
-                const hasCoordinates = await this.getCityCoordinates(this.searchKey);
-                if (!hasCoordinates) {
+				console.log('city in search: ' ,this.weatherData.city);
+                await this.getCityCoordinates(this.searchKey);
+                if (!this.location) {
                     throw new Error('无法获取城市坐标');
                 }
 
                 await this.getWeatherByCoords();
-                this.weatherData.city = this.searchKey;
+				this.weatherData.city = this.searchKey;
                 
             } catch (error) {
                 console.error('搜索城市天气失败:', error);
@@ -360,10 +388,10 @@ export default {
         		} else {
         			// 否则更新当天的温度范围
         			if (day.main.temp_min < acc[date].tempMin) {
-        				acc[date].tempMin = day.main.temp_min - 273.15;
+        				acc[date].temp_min - 273.15;
         			}
         			if (day.main.temp_max > acc[date].tempMax) {
-        				acc[date].tempMax = day.main.temp_max - 273.15;
+        				acc[date].temp_max - 273.15;
         			}
         		}
         
@@ -654,5 +682,9 @@ export default {
     font-size: 38rpx;
     color: #666;
     margin-bottom: 30rpx;
+}
+
+.weather-webview {
+    display: none;
 }
 </style>

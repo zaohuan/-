@@ -99,6 +99,7 @@ exports.main = async (event, context) => {
       'Content-Type': 'application/json',
       'Content-Length': Buffer.byteLength(requestData),
     },
+    timeout: 120000  // 设置为2分钟
   };
 
   return new Promise((resolve, reject) => {

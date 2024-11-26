@@ -38,16 +38,7 @@
 	export default {
 		data() {
 			return {
-				tripList: [
-					{
-						id: 1,
-						city: '福州',
-						day: 1,
-						route: '鼓山 → 三坊七巷 → 达明美食街',
-						budget: '1460-2780'
-					}
-					// 可以添加更多行程数据
-				]
+				tripList: []
 			}
 		},
 		methods: {
@@ -70,7 +61,45 @@
 				uni.navigateTo({
 					url: `/pages/manual-modify/manual-modify?id=${trip.id}`
 				})
+			},
+			fetchTrips() {
+				const userInfo = uni.getStorageSync('userInfo');
+				if (!userInfo) {
+					uni.showToast({
+						title: '用户未登录',
+						icon: 'none'
+					});
+					return;
+				}
+
+				uniCloud.callFunction({
+					name: 'getMyTrips',
+					data: {
+						userInfo: userInfo
+					},
+					success: (res) => {
+						if (res.result && res.result.success) {
+							this.tripList = res.result.data;
+							console.log('行程列表:', this.tripList);
+						} else {
+							uni.showToast({
+								title: '获取行程失败',
+								icon: 'none'
+							});
+						}
+					},
+					fail: (err) => {
+						console.error('获取行程失败:', err);
+						uni.showToast({
+							title: '请求失败，请稍后再试',
+							icon: 'none'
+						});
+					}
+				});
 			}
+		},
+		onLoad() {
+			this.fetchTrips()
 		}
 	}
 </script>

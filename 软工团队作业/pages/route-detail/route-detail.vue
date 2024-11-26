@@ -111,8 +111,7 @@ export default defineComponent({
       // 获取web-view组件
       // @ts-ignore
       const webviewId = currentWebview.children()[0]
-      console.log(currentWebview, currentWebview.children(),currentWebview.children()[0]);
-	  
+      
       if (webviewId) {
         webviewId.setStyle({
           width: '100%',
@@ -248,25 +247,13 @@ export default defineComponent({
       
       eventChannel.on('acceptRouteData', (data: any) => {
         console.log('接收到路线数据：', JSON.stringify(data))
-        routeData.value = data
         
-        // 构造路线参数
-        const routeParams = {
-          title: data.title || '',
-          spots: Array.isArray(data.spots) ? data.spots : [],  // 确保是数组
-          budget: data.budget || ''
-        }
         
-        // 构造表单数据
-        const defaultFormData = {
-          destination: '福州',  // 设置默认值
-          startDate: new Date().toISOString().split('T')[0],  // 今天
-          endDate: new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0],  // 明天
-        }
-        
-        console.log('处理后的路线参数：', routeParams)
-        // 调用获取详细行程的方法
-        getDetailedSchedule(routeParams, defaultFormData)
+      routeData.value = data.routeData;
+      formData.value = data.formData;
+      
+      // 调用获取详细行程的方法，传入两个参数
+      getDetailedSchedule(data.routeData, data.formData);
       })
     })
 

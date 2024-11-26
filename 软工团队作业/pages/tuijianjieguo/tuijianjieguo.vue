@@ -86,12 +86,21 @@ export default defineComponent({
     const recommendRoutes = ref<RouteItem[]>([])
 
     const navigateToDetail = (route: RouteItem) => {
+      // 获取当前页面栈
+      const pages = getCurrentPages();
+      const prevPage = pages[pages.length - 2]; // 获取上一个页面
+      const formData = prevPage.$vm.formData; // 获取表单数据
+      
       uni.navigateTo({
         url: '/pages/route-detail/route-detail',
         success: (res) => {
-          res.eventChannel.emit('acceptRouteData', route)
+          // 同时传递路线数据和表单数据
+          res.eventChannel.emit('acceptRouteData', {
+            routeData: route,
+            formData: formData
+          });
         }
-      })
+      });
     }
 
     // 获取推荐路线
@@ -121,9 +130,11 @@ export default defineComponent({
             },
             success: (res) => {
               if (res.result) {
+                console.log('云函数返回结果:', res.result);
                 recommendRoutes.value = res.result.data.routes || [];
                 completeProgress()
               } else {
+                console.error('云函数返回数据异常:', res);
                 completeProgress()
                 uni.showToast({
                   title: '未能获取有效的推荐数据',
@@ -132,6 +143,8 @@ export default defineComponent({
               }
             },
             fail: (err) => {
+              console.error('调用云函数失败, 错误详情:', err);
+              console.error('错误堆栈:', err.stack);
               completeProgress()
               uni.showToast({
                 title: '请求失败，请稍后再试',

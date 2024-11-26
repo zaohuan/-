@@ -18,24 +18,13 @@
             v-for="(route, index) in recommendRoutes" 
             :key="index"
             @click="navigateToDetail(route)">
-        
         <view class="route-title">{{ route.title }}</view>
-        
         <view class="route-path">
-          <!-- 遍历每一天的行程 -->
-          <template v-for="(day, dayIndex) in route.spots" :key="dayIndex">
-            <view class="day-spots">
-              <text>第{{ day.day }}天:</text>
-              <!-- 遍历每一天的景点 -->
-              <template v-for="(spot, spotIndex) in day.spots" :key="spotIndex">
-                <text>{{ spot.name }}</text>
-                <text v-if="spotIndex !== day.spots.length - 1"> → </text>
-              </template>
-            </view>
-            <view v-if="dayIndex !== route.spots.length - 1" class="route-divider"> | </view>
+          <template v-for="(spot, spotIndex) in route.spots" :key="spotIndex">
+            <text>{{ spot.name }}</text>
+            <text v-if="spotIndex !== route.spots.length - 1"> → </text>
           </template>
         </view>
-        
         <view class="route-budget">预算：{{ route.budget }}元/人</view>
       </view>
     </view>

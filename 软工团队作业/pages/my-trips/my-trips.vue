@@ -59,7 +59,7 @@
 			},
 			manualModify(trip) {
 				uni.navigateTo({
-					url: `/pages/manual-modify/manual-modify?id=${trip.id}`
+					url: `/pages/trip-modify/trip-modify?id=${trip.id}`
 				})
 			},
 			fetchTrips() {

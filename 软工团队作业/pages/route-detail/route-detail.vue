@@ -397,13 +397,13 @@ export default defineComponent({
 
 .btn {
   flex: 1;
-  margin: 0 7.5px;
+  margin: 10px 7.5px 50 px 7.5px;
   background: #007AFF;
   color: #fff;
   text-align: center;
   
-  padding: 12px;
+  padding: 0px;
   border-radius: 25px;
-  font-size: 14px;
+  font-size: 24px;
 }
 </style>

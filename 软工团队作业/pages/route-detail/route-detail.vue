@@ -205,7 +205,8 @@ export default defineComponent({
         name: 'addToTrip',
         data: {
           scheduleData: scheduleData.value,
-          userInfo : userInfo
+          routeData: routeData.value,
+		  userInfo : userInfo
         },
         success: (res) => {
           if (res.result && res.result.success) {

@@ -205,7 +205,7 @@ export default defineComponent({
         name: 'addToTrip',
         data: {
           scheduleData: scheduleData.value,
-          scheduleTitle: routeData.value,
+          routeData: routeData.value,
 		  userInfo : userInfo
         },
         success: (res) => {

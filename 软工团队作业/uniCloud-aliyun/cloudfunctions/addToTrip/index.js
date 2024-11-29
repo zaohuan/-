@@ -14,7 +14,7 @@ exports.main = async (event, context) => {
       created_at: new Date().toISOString()
     });
 	
-	const res = await db.collection('myRoutes').add({
+	const routeres = await db.collection('myRoutes').add({
 	  user_id: user_id,
 	  routeData: routeData,
 	  created_at: new Date().toISOString()

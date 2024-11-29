@@ -115,7 +115,9 @@ export default defineComponent({
       if (webviewId) {
         webviewId.setStyle({
           width: '100%',
-          height: '50vh'
+          height: '32vh',
+          position: 'relative',
+          zIndex: 1
         })
         // 发送消息到web-view
         webviewId.evalJS(`
@@ -241,6 +243,26 @@ export default defineComponent({
     }
 
     onMounted(() => {
+      setTimeout(() => {
+        const pages = getCurrentPages()
+        const page = pages[pages.length - 1]
+        // @ts-ignore
+        const currentWebview = page.$getAppWebview()
+        
+        // 获取web-view组件
+        // @ts-ignore
+        const webviewId = currentWebview.children()[0]
+        
+        if (webviewId) {
+          webviewId.setStyle({
+            width: '100%',
+            height: '32vh',
+            position: 'relative',
+            zIndex: 1
+          })
+        }
+      }, 100)
+
       const pages = getCurrentPages()
       const currentPage = pages[pages.length - 1]
       const eventChannel = currentPage.getOpenerEventChannel()
@@ -281,9 +303,9 @@ export default defineComponent({
 
 .map-section {
   flex: none;
-  height: 50vh;
-  max-height: 50vh;
+  height: 32vh;
   position: relative;
+  z-index: 1;
 }
 
 .map-container {
@@ -296,30 +318,68 @@ export default defineComponent({
   left: 0;
   right: 0;
   bottom: 0;
-  height: 55vh;
-  margin-top: -50px;
+  height: 73vh;
   background: #fff;
   border-radius: 20px 20px 0 0;
-  padding: 15px 20px;
+  z-index: 999;
   display: flex;
   flex-direction: column;
-  z-index: 999;
+  padding: 8px 20px;
+}
+
+.schedule-list {
+  flex: 1;
+  overflow-y: scroll;
+  padding-right: 10px;
+  margin-bottom: 35px;
+}
+
+.bottom-buttons {
+  position: fixed;
+  left: 20px;
+  right: 20px;
+  bottom: 80px;
+  padding: 10px;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  z-index: 9999;
+}
+
+.btn {
+  width: 120px;
+  flex: none;
+  height: 30px;
+  line-height: 44px;
+  background: #007AFF;
+  color: #fff;
+  text-align: center;
+  border-radius: 25px;
+  font-size: 18px;
+}
+
+.btn:first-child {
+  margin-right: 25px;
+}
+
+.btn:last-child {
+  margin-left: 25px;
 }
 
 .day-tabs {
+  padding: 6px 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 10px;
-  margin: 0 0 10px 0;
-  height: 50px;
+  border-bottom: 1px solid #eee;
 }
 
 .day-text {
   font-size: 16px;
   color: #333;
   margin: 0 5px;
-  line-height: 30px;
 }
 
 .day-tab {
@@ -330,10 +390,6 @@ export default defineComponent({
   margin: 0 5px;
   border-radius: 50%;
   background: #f5f5f5;
-  font-size: 16px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .day-tab.active {
@@ -341,17 +397,9 @@ export default defineComponent({
   color: #fff;
 }
 
-.schedule-list {
-  flex: 1;
-  overflow-y: scroll;
-  padding-right: 10px;
-  margin-bottom: 10px;
-  max-height: calc(100% - 120px);
-}
-
 .schedule-item {
   display: flex;
-  margin-bottom: 20px;
+  padding: 10px 0;
 }
 
 .time {
@@ -383,27 +431,5 @@ export default defineComponent({
   width: 14px;
   height: 14px;
   margin-right: 5px;
-}
-
-.bottom-buttons {
-  display: flex;
-  padding: 10px 0;
-  background: #fff;
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  right: 20px;
-}
-
-.btn {
-  flex: 1;
-  margin: 10px 7.5px 50 px 7.5px;
-  background: #007AFF;
-  color: #fff;
-  text-align: center;
-  
-  padding: 0px;
-  border-radius: 25px;
-  font-size: 24px;
 }
 </style>

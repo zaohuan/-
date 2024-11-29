@@ -294,16 +294,19 @@ export default {
             const aqiLevel = ['', '优', '良', '轻度污染', '中度污染', '重度污染'];
             const aqi = airData.list && airData.list[0] ? aqiLevel[airData.list[0].main.aqi] : '暂无数据';
         
+            // 获取今天的预报数据
+            const todayForecast = forecastData.list[0];
+            
             this.weatherData = {
                 ...this.weatherData,
-                // 使用 weatherData.main.temp 获取温度
+                // 当前温度
                 temperature: Math.round(weatherData.main.temp),
-                // 获取当天的最高最低温度
+                // 今天的最高最低温度
                 todayTemp: {
-                    max: Math.round(weatherData.main.temp_max),
-                    min: Math.round(weatherData.main.temp_min)
+                    max: Math.round(todayForecast.main.temp_max),
+                    min: Math.round(todayForecast.main.temp_min)
                 },
-                // 获取天气描述
+                // 天气描述
                 weather: weatherData.weather[0].description,
                 // 空气质量
                 airQuality: aqi,
@@ -313,7 +316,7 @@ export default {
                 humidity: weatherData.main.humidity,
                 // 日出和日落时间
                 sunTime: this.formatSunTime(weatherData.sys.sunrise, weatherData.sys.sunset),
-                // 天气预报（这里可能需要修改格式化方法）
+                // 天气预报
                 forecast: this.formatForecastData(forecastData.list)
             };
         },
@@ -374,39 +377,35 @@ export default {
         // 格式化预报数据
         formatForecastData(dailyData) {
             // 按日期分组
-        	const groupedData = dailyData.reduce((acc, day) => {
-        		const date = this.formatForecastDate(day.dt);  // 格式化日期（如：2024-11-15）
-        
-        		// 如果当天的数据组还不存在，则初始化
-        		if (!acc[date]) {
-        			acc[date] = {
-        				date: date,
-        				weather: day.weather[0].description,
-        				tempMin: day.main.temp_min - 273.15,
-        				tempMax: day.main.temp_max - 273.15
-        			};
-        		} else {
-        			// 否则更新当天的温度范围
-        			if (day.main.temp_min < acc[date].tempMin) {
-        				acc[date].temp_min - 273.15;
-        			}
-        			if (day.main.temp_max > acc[date].tempMax) {
-        				acc[date].temp_max - 273.15;
-        			}
-        		}
-        
-        		return acc;
-        	}, {});
-        
-        	// 获取前五天的天气
-        	const forecast = Object.values(groupedData).slice(0, 5).map(day => ({
-        		date: day.date,
-        		dayWeather: day.weather,
-        		tempMin: Math.round(day.tempMin),
-        		tempMax: Math.round(day.tempMax)
-        	}));
+            const groupedData = {};
             
-            return forecast;
+            dailyData.forEach(item => {
+                const date = this.formatForecastDate(item.dt);
+                if (!groupedData[date]) {
+                    groupedData[date] = {
+                        date: date,
+                        dayWeather: item.weather[0].description,
+                        tempMin: item.main.temp_min,
+                        tempMax: item.main.temp_max
+                    };
+                } else {
+                    // 更新最高最低温度
+                    if (item.main.temp_min < groupedData[date].tempMin) {
+                        groupedData[date].tempMin = item.main.temp_min;
+                    }
+                    if (item.main.temp_max > groupedData[date].tempMax) {
+                        groupedData[date].tempMax = item.main.temp_max;
+                    }
+                }
+            });
+
+            // 获取前五天的天气预报
+            return Object.values(groupedData).slice(0, 5).map(day => ({
+                date: day.date,
+                dayWeather: day.dayWeather,
+                tempMax: Math.round(day.tempMax),
+                tempMin: Math.round(day.tempMin)
+            }));
         },
 
         // 格式化预报日期
@@ -416,7 +415,7 @@ export default {
             const day = date.getDate();
             const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
             const weekDay = weekDays[date.getDay()];
-            return `${month}/${day} ${weekDay}`;
+            return `${day}/${month} ${weekDay}`;
         },
 
         // 获取天气图标

@@ -101,7 +101,7 @@ exports.main = async (event, context) => {
     top_p: 1.0
   };
 
-  const url = `https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions_pro?access_token=${accessToken}`;
+  const url = `https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/ernie-4.0-turbo-8k?access_token=${accessToken}`;
   const requestData = JSON.stringify(params);
 
   const options = {

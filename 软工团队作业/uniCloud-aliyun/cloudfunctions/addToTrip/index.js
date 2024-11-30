@@ -16,6 +16,7 @@ exports.main = async (event, context) => {
 	
 	const routeres = await db.collection('myRoutes').add({
 	  user_id: user_id,
+	  routeTitle: routeData.title,
 	  routeData: routeData,
 	  created_at: new Date().toISOString()
 	});

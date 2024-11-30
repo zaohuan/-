@@ -193,26 +193,6 @@ export default defineComponent({
     	  }
     	  
       try {
-        const db = uniCloud.database();
-        const collection = db.collection('travel_plan'); // 假设你创建了一个集合名为 travel_plan
-    
-        // 提交数据到云数据库
-        await collection.add({
-          destination: formData.destination,
-          startDate: formData.startDate,
-          endDate: formData.endDate,
-          budgetMin: formData.budgetMin,
-          budgetMax: formData.budgetMax,
-          accessibility: formData.accessibility,
-          kidFriendly: formData.kidFriendly,
-          petFriendly: formData.petFriendly,
-          naturalLandscape: formData.naturalLandscape,
-          socialLandscape: formData.socialLandscape,
-          cuisine: formData.cuisine,
-          otherNeeds: formData.otherNeeds,
-          // 添加其他可能的字段
-          createTime: new Date(), // 保存提交时间
-        });
     
         // 提交成功后跳转到推荐结果页面
         uni.navigateTo({

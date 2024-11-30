@@ -30,8 +30,9 @@
           <view class="action-btn real-time" @click.stop="realTimeAdjust(trip)">
             <text>实时调整</text>
           </view>
-          <view class="action-btn manual" @click.stop="manualModify(trip)">
-            <text>手动修改</text>
+          <!-- 删除按钮 -->
+          <view class="action-btn delete" @click.stop="deleteTrip(trip, index)">
+            <text>删除</text>
           </view>
         </view>
       </view>
@@ -80,11 +81,58 @@ export default {
         url: `/pages/realtime/realtime?id=${trip._id}`,
       });
     },
-    manualModify(trip) {
-      uni.navigateTo({
-        url: `/pages/trip-modify/trip-modify?id=${trip._id}`,
-      });
+    // 删除行程
+    async deleteTrip(trip, index) {
+      const userInfo = uni.getStorageSync("userInfo");
+      if (!userInfo) {
+        uni.showToast({
+          title: "用户未登录",
+          icon: "none",
+        });
+        return;
+      }
+
+      const title = trip.routeData?.title;  // 获取行程的标题
+
+      if (!title) {
+        uni.showToast({
+          title: "行程标题不完整",
+          icon: "none",
+        });
+        return;
+      }
+
+      try {
+        const res = await uniCloud.callFunction({
+          name: "deleteMyTrip",  // 云函数名称
+          data: {
+            userInfo: userInfo,
+            title: title,  // 传递标题
+          },
+        });
+
+        if (res.result && res.result.success) {
+          // 如果删除成功，从 tripList 中移除该行程
+          this.tripList.splice(index, 1);
+          uni.showToast({
+            title: "行程已删除",
+            icon: "success"
+          });
+        } else {
+          uni.showToast({
+            title: res.result.message || "删除失败",
+            icon: "none",
+          });
+        }
+      } catch (error) {
+        console.error("删除行程失败:", error);
+        uni.showToast({
+          title: "请求失败，请稍后再试",
+          icon: "none",
+        });
+      }
     },
+
     fetchData() {
       const userInfo = uni.getStorageSync("userInfo");
       if (!userInfo) {
@@ -99,7 +147,6 @@ export default {
         name: "getMyRoutes",
         data: {
           userInfo: userInfo,
-		  
         },
         success: (res) => {
           if (res.result && res.result.success) {
@@ -224,9 +271,9 @@ export default {
             color: #fff;
           }
 
-          &.manual {
-            background-color: #f0f0f0;
-            color: #666;
+          &.delete {
+            background-color: #ff4d4f;
+            color: #fff;
           }
         }
       }

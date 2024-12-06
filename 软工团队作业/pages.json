@@ -76,21 +76,9 @@
 			}
 		},
 		{
-			"path": "pages/realtime/realtime",
-			"style": {
-				"navigationBarTitleText": "实时调整"
-			}
-		},
-		{
 			"path": "pages/prepare/prepare",
 			"style": {
 				"navigationBarTitleText": "未雨绸缪"
-			}
-		},
-				{
-			"path": "pages/prepareres/prepareres",
-			"style": {
-				"navigationBarTitleText": "调整结果"
 			}
 		},
 		{

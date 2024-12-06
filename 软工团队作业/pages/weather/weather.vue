@@ -109,7 +109,6 @@
 		</view>
 		
 		<view class="action-buttons">
-			<button class="action-btn" @click="handleRealtime">实时调整</button>
 			<button class="action-btn" @click="handlePrepare">未雨绸缪</button>
 		</view>
 		
@@ -158,7 +157,7 @@ export default {
         }
     },
 	
-// 产品功能编号：FUNC-007，系统应自动获取用户旅行目的地的实时天气信息。
+// 产品功能编号：FUNC-007，系统应自动获取用户旅行当地的实时天气信息。
     methods: {
         // 获取当前位置并显示天气
         async getCurrentLocationWeather() {
@@ -319,6 +318,16 @@ export default {
                 // 天气预报
                 forecast: this.formatForecastData(forecastData.list)
             };
+
+            // 添加缓存
+            try {
+                uni.setStorageSync('cached_weather_data', {
+                    data: this.weatherData,
+                    timestamp: new Date().getTime()
+                });
+            } catch (e) {
+                console.error('缓存天气数据失败:', e);
+            }
         },
 
         // 处理搜索
@@ -441,12 +450,6 @@ export default {
         },
 
         // 页面跳转方法
-        handleRealtime() {
-            uni.navigateTo({
-                url: '/pages/realtime/realtime'
-            });
-        },
-        
         handlePrepare() {
             uni.navigateTo({
                 url: '/pages/prepare/prepare'

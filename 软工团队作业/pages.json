@@ -76,9 +76,9 @@
 			}
 		},
 		{
-			"path": "pages/realtime/realtime",
+			"path": "pages/prepare/prepare",
 			"style": {
-				"navigationBarTitleText": "实时调整"
+				"navigationBarTitleText": "未雨绸缪"
 			}
 		},
 		{

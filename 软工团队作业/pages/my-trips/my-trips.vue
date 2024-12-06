@@ -27,10 +27,7 @@
           <text>预算：{{ trip.routeData.budget }}元/人</text>
         </view>
         <view class="trip-actions">
-          <view class="action-btn real-time" @click.stop="realTimeAdjust(trip)">
-            <text>实时调整</text>
-          </view>
-          <!-- 删除按钮 -->
+          <!-- 删除实时调整按钮，只保留删除按钮 -->
           <view class="action-btn delete" @click.stop="deleteTrip(trip, index)">
             <text>删除</text>
           </view>
@@ -75,11 +72,6 @@ export default {
           icon: 'none'
         });
       }
-    },
-    realTimeAdjust(trip) {
-      uni.navigateTo({
-        url: `/pages/realtime/realtime?id=${trip._id}`,
-      });
     },
     // 删除行程
     async deleteTrip(trip, index) {

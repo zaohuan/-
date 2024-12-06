@@ -82,18 +82,6 @@
 			}
 		},
 		{
-			"path": "pages/prepare/prepare",
-			"style": {
-				"navigationBarTitleText": "未雨绸缪"
-			}
-		},
-				{
-			"path": "pages/prepareres/prepareres",
-			"style": {
-				"navigationBarTitleText": "调整结果"
-			}
-		},
-		{
 			"path": "pages/customer-servece/customer-service",
 			"style": {
 				"navigationBarTitleText": "智能客服中心",

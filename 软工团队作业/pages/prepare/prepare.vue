@@ -1,157 +1,185 @@
 <!-- PTR-FR-002 -->
 <template>
   <view class="container">
-    <!-- 推荐路线列表 -->
-    <view class="route-list">
-      <view class="route-card" 
-            v-for="(route, index) in prepareRoutes" 
-            :key="index"
-            @click="navigateToDetail(route)">
-        <view class="route-title">{{ route.title }}</view>
-        <view class="route-path">
-          <template v-for="(spot, spotIndex) in route.spots" :key="spotIndex">
-            <text>{{ spot.name }}</text>
-            <text v-if="spotIndex !== route.spots.length - 1"> → </text>
-          </template>
+    <!-- 天气预报部分 -->
+    <view class="weather-forecast" v-if="weatherData">
+      <view class="section-title">未来天气预报</view>
+      <view class="forecast-list">
+        <view class="forecast-item" v-for="(item, index) in weatherData.forecast" :key="index">
+          <text class="date">{{item.date}}</text>
+          <view class="forecast-weather">
+            <text class="day-weather">{{item.dayWeather}}</text>
+            <image 
+              :src="getWeatherIcon(item.dayWeather)" 
+              class="forecast-weather-icon"
+              mode="aspectFit"
+            ></image>
+          </view>
+          <text class="temp-range">{{item.tempMin}}° / {{item.tempMax}}°</text>
         </view>
-        <button 
-          class="adjust-btn" 
-          @click.stop="handleAdjust(route)"
-        >智能调整</button>
+      </view>
+    </view>
+
+    <!-- 天气提示部分 -->
+    <view class="weather-tips" v-if="weatherData">
+      <view class="section-title">出行建议</view>
+      <view class="tips-content">
+        <text>{{ weatherTips }}</text>
       </view>
     </view>
   </view>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue'
 
-interface SpotItem {
-  name: string
-  isAdjusted?: boolean  // 可选,用于标记调整后的景点
-}
-
-interface RouteItem {
-  title: string        // 路线标题
-  spots: SpotItem[]    // 景点数组
-}
-
-export default defineComponent({
-  setup() {
-    const prepareRoutes = ref<RouteItem[]>([
-      {
-        title: '豪华尊享游',
-        spots: [
-          { name: '鼓山' },
-          { name: '三坊七巷' },
-          { name: '达明美食街' }
-        ]
-      },
-      {
-        title: '经济适用游',
-        spots: [
-          { name: '鼓山' },
-          { name: '闽江公园' },
-          { name: '万达广场/老街' }
-        ]
-      },
-      {
-        title: '特种兵穷游',
-        spots: [
-          { name: '青云山' },
-          { name: '鼓山' },
-          { name: '达明美食街' }
-        ]
-      }
-    ])
-
-    const navigateToDetail = (route: RouteItem) => {
-      uni.navigateTo({
-        url: '/pages/route-detail/route-detail',
-        success: (res) => {
-          res.eventChannel.emit('acceptRouteData', route)
-        }
-      })
-    }
-
-    const handleAdjust = (route: RouteItem) => {
-      uni.navigateTo({
-        url: '/pages/prepareres/prepareres',
-        success: (res) => {
-          res.eventChannel.emit('acceptRouteData', route)
-        }
-      })
-    }
-
-    // 处理表单数据并生成推荐路线
-    const generateRecommendations = (formData: any) => {
-      // 如果需要根据表单数据更新路线，可以在这里更新 prepareRoutes.value
-      console.log('处理表单数据:', formData)
-    }
-
-    onMounted(() => {
-      const pages = getCurrentPages()
-      const currentPage = pages[pages.length - 1]
-      const eventChannel = currentPage.getOpenerEventChannel()
-      
-      eventChannel.on('acceptFormData', (data) => {
-        console.log('接收到的表单数据：', data)
-        generateRecommendations(data)
-      })
-    })
-
+<script>
+export default {
+  data() {
     return {
-      prepareRoutes,
-      navigateToDetail,
-      handleAdjust
+      weatherData: null,
+      badWeatherTypes: ['小雨', '大雨', '雷雨', '降雪', '雾', '霾']
+    }
+  },
+
+  computed: {
+    weatherTips() {
+      if (!this.weatherData || !this.weatherData.forecast) return '';
+
+      const badWeatherDays = this.weatherData.forecast.filter(day => 
+        this.badWeatherTypes.some(type => day.dayWeather.includes(type))
+      );
+
+      if (badWeatherDays.length === 0) {
+        return '未来几天天气晴好，适合户外活动，建议准备防晒用品，多补充水分。';
+      }
+
+      let tips = '注意：\n';
+      badWeatherDays.forEach(day => {
+        tips += `${day.date}将出现${day.dayWeather}，`;
+        
+        if (day.dayWeather.includes('雨')) {
+          tips += '建议携带雨具，选择室内景点。\n';
+        } else if (day.dayWeather.includes('雪')) {
+          tips += '注意保暖，道路可能湿滑。\n';
+        } else if (day.dayWeather.includes('雷')) {
+          tips += '注意雷电，选择室内活动。\n';
+        }else if (day.dayWeather.includes('雾')) {
+          tips += '出现记得戴口罩，建议尽量选择室内活动。\n';
+        }else if (day.dayWeather.includes('霾')) {
+          tips += '出现记得戴口罩，建议尽量选择室内活动。\n';
+        }
+      });
+
+      return tips;
+    }
+  },
+
+  methods: {
+    getWeatherIcon(weather) {
+      const iconMap = {
+        '晴天': '/static/sunny.png',
+        '多云': '/static/cloudy.png',
+        '小雨': '/static/light-rain.png',
+        '大雨': '/static/heavy-rain.png',
+        '雷雨': '/static/thunder.png',
+        '降雪': '/static/snow.png'
+      }
+      return iconMap[weather] || '/static/sunny.png'
+    },
+
+    loadCachedWeatherData() {
+      try {
+        const cachedData = uni.getStorageSync('cached_weather_data');
+        if (cachedData && cachedData.data) {
+          const now = new Date().getTime();
+          if (now - cachedData.timestamp < 1 * 60 * 1000) { // 1分钟缓存
+            this.weatherData = cachedData.data;
+            return true;
+          }
+        }
+        return false;
+      } catch (e) {
+        console.error('读取缓存天气数据失败:', e);
+        return false;
+      }
+    }
+  },
+
+  onLoad() {
+    // 尝试加载缓存的天气数据
+    if (!this.loadCachedWeatherData()) {
+      // 如果没有缓存数据，跳转回天气页面
+      uni.showToast({
+        title: '有更新，请先查看天气信息',
+        icon: 'none',
+        duration: 1000,
+        success: () => {
+          setTimeout(() => {
+            uni.navigateBack();
+          }, 1000);
+        }
+      });
     }
   }
-})
+}
 </script>
 
-<style scoped>
+<style>
 .container {
-  padding: 20px;
+  padding: 20rpx;
   background-color: #f5f5f5;
 }
 
-.route-list {
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin: 20rpx 0;
+  color: #333;
+}
+
+.weather-forecast {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.forecast-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10rpx;
 }
 
-.route-card {
+.forecast-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15rpx 0;
+  border-bottom: 1rpx solid #eee;
+}
+
+.forecast-weather {
+  display: flex;
+  align-items: center;
+}
+
+.forecast-weather-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-left: 10rpx;
+}
+
+.weather-tips {
   background-color: #fff;
-  border-radius: 10px;
-  padding: 20px;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
 }
 
-.route-title {
-  color: #ff6b6b;
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.route-path {
-  font-size: 16px;
-  color: #333;
-  margin-bottom: 10px;
-}
-
-.adjust-btn {
-  background-color: #4a90e2;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 8px 0;
-  font-size: 16px;
-  width: 100%;
-  margin-top: 10px;
-}
-
-.adjust-btn:active {
-  background-color: #357abd;
+.tips-content {
+  padding: 15rpx;
+  background-color: #f8f8f8;
+  border-radius: 8rpx;
+  line-height: 1.6;
+  color: #666;
 }
 </style> 
